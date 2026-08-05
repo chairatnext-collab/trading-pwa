@@ -470,7 +470,7 @@ function processData(content) {
   // Detect current month (most recent with trades)
   let curAbbr = null, curKey = null;
   // Try indexOf approach first
-  const ABBRL = ['ธ.ค.','พ.ย.','ต.ค.','ก.ย.','ส.ค.','ก.ค.','มิ.ย.','พ.ค.','เม.ย.','มี.ค.','ก.พ.','ม.ค.'];
+  const ABBRS = ['ธ.ค.','พ.ย.','ต.ค.','ก.ย.','ส.ค.','ก.ค.','มิ.ย.','พ.ค.','เม.ย.','มี.ค.','ก.พ.','ม.ค.'];
   for (const a of ABBRS) {
     if (content.indexOf('\\[merged\\] '+a+' 20') !== -1) { curAbbr = a; break; }
   }
