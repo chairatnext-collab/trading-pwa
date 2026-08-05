@@ -731,14 +731,12 @@ async function init() {
   }
 }
 
-// Bootstrap
-_apiKey = getApiKey();
-if (_apiKey) {
-  document.getElementById('setupScreen').style.display='none';
-  init();
-} else {
-  document.getElementById('setupScreen').style.display='flex';
-}
+// Bootstrap — API key hardcoded, no setup screen needed
+const HARDCODED_KEY = 'AIzaSyDKKOy2U5xspZg1Nbq0edxpPCg7qV4_zmU';
+_apiKey = getApiKey() || HARDCODED_KEY;
+if (!getApiKey()) localStorage.setItem('gSheetApiKey', HARDCODED_KEY);
+document.getElementById('setupScreen').style.display='none';
+init();
 </script>
 </body>
 </html>
