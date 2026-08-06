@@ -416,7 +416,7 @@ function parseAllMonthlyPnL(content) {
     byAbbr[abbr] = {
       pnl: byAbbr[abbr].pnl, wins, losses, total,
       deltaVal: delta, winRateDay: total>0 ? (wins/total*100).toFixed(1)+'%' : null,
-      dayPF: gl>0 ? (gp/gl).toFixed(2) : null,
+      dayPF: gl>0 ? (gp/gl).toFixed(2) : (gp>0 ? '∞' : null),
       hasTrades: total>0, _gp:gp, _gl:gl,
     };
   }
@@ -573,7 +573,7 @@ function renderAll() {
   document.getElementById('kpiPF').textContent = pf || '—';
   const ddEl = document.getElementById('kpiDD');
   ddEl.textContent = dd;
-  ddEl.style.color = dd==='0.00%' ? 'var(--muted)' : 'var(--red)';
+  ddEl.style.color = dd==='0.00%' ? 'var(--green)' : 'var(--red)';
   document.getElementById('kpiDays').textContent = tradeDays || '—';
 
   // Win/Loss bar
