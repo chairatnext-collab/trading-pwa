@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#0f1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="à¹à¸à¸£à¸">
-<title>à¸à¸±à¸à¸à¸¶à¸à¹à¸à¸£à¸ XAU/USD</title>
+<meta name="apple-mobile-web-app-title" content="เทรด">
+<title>บันทึกเทรด XAU/USD</title>
 <link rel="manifest" href="./manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <style>
@@ -20,7 +20,7 @@
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
 
-/* âââ LAYOUT âââ */
+/* ─── LAYOUT ─── */
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 #topbar{
   padding:calc(var(--safe-top) + 12px) 16px 12px;
@@ -35,7 +35,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   display:flex;z-index:100;
 }
 
-/* âââ TOPBAR âââ */
+/* ─── TOPBAR ─── */
 .app-title{font-size:15px;font-weight:700;color:var(--gold);flex:1}
 #monthSel{
   background:var(--bg3);border:1px solid var(--border);color:var(--text);
@@ -49,7 +49,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 #refreshBtn.spin{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* âââ NAV TABS âââ */
+/* ─── NAV TABS ─── */
 .nav-tab{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:8px 0 6px;gap:3px;cursor:pointer;border:none;background:none;
@@ -58,11 +58,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .nav-tab.active{color:var(--gold)}
 .nav-tab .icon{font-size:20px}
 
-/* âââ PAGES âââ */
+/* ─── PAGES ─── */
 .page{display:none;padding:16px 16px 8px}
 .page.active{display:block}
 
-/* âââ EQUITY HERO âââ */
+/* ─── EQUITY HERO ─── */
 .equity-hero{
   background:linear-gradient(135deg,var(--bg2),var(--bg3));
   border:1px solid var(--border);border-radius:16px;padding:20px;
@@ -73,14 +73,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .equity-sub{font-size:13px;margin-top:8px}
 .equity-sub .pos{color:var(--green)}.equity-sub .neg{color:var(--red)}.equity-sub .neu{color:var(--muted)}
 
-/* âââ KPI GRID âââ */
+/* ─── KPI GRID ─── */
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 12px}
 .kpi-label{font-size:10px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase;margin-bottom:6px}
 .kpi-val{font-size:22px;font-weight:700;color:var(--text)}
 .kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
 
-/* âââ WIN/LOSS BAR âââ */
+/* ─── WIN/LOSS BAR ─── */
 .wl-bar-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
 .wl-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
 .wl-bar{height:8px;border-radius:4px;background:var(--bg3);overflow:hidden}
@@ -88,7 +88,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .wl-counts{display:flex;justify-content:space-between;font-size:12px;margin-top:6px}
 .wl-win{color:var(--green)}.wl-loss{color:var(--red)}
 
-/* âââ STREAK âââ */
+/* ─── STREAK ─── */
 .streak-card{
   background:var(--bg2);border:1px solid var(--border);border-radius:12px;
   padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;
@@ -99,7 +99,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .streak-val{font-size:24px;font-weight:700}
 .streak-sub{font-size:11px;color:var(--muted)}
 
-/* âââ CALENDAR âââ */
+/* ─── CALENDAR ─── */
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
 .cal-dow{text-align:center;font-size:10px;color:var(--muted);padding:4px 0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
@@ -119,12 +119,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .cal-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
 .section-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
 
-/* âââ CHART AREA âââ */
+/* ─── CHART AREA ─── */
 .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
 .chart-wrap{position:relative;height:200px}
 
-/* âââ HISTORY TABLE âââ */
+/* ─── HISTORY TABLE ─── */
 .hist-table{width:100%;border-collapse:collapse;font-size:13px}
 .hist-table th{font-size:10px;color:var(--muted);text-transform:uppercase;padding:6px 4px;border-bottom:1px solid var(--border);font-weight:500}
 .hist-table td{padding:10px 4px;border-bottom:1px solid var(--border)}
@@ -134,7 +134,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .pnl-zero{color:var(--muted)}
 .active-month-row td{background:rgba(212,167,44,.06)}
 
-/* âââ LOADING / ERROR âââ */
+/* ─── LOADING / ERROR ─── */
 #loadingScreen{
   position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:16px;z-index:999;
@@ -143,7 +143,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .load-text{color:var(--muted);font-size:14px}
 #errorBanner{display:none;background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.3);border-radius:10px;padding:12px;margin:16px;color:#e57373;font-size:13px}
 
-/* âââ SETUP SCREEN âââ */
+/* ─── SETUP SCREEN ─── */
 #setupScreen{
   position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:16px;z-index:998;padding:24px;text-align:center;
@@ -161,7 +161,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .setup-btn:active{opacity:.85}
 .setup-note{font-size:11px;color:var(--muted);max-width:320px;line-height:1.5}
 
-/* âââ INSTALL BANNER âââ */
+/* ─── INSTALL BANNER ─── */
 #installBanner{
   display:none;background:var(--bg2);border:1px solid var(--gold);border-radius:10px;
   margin:12px 16px 0;padding:12px 14px;
@@ -172,7 +172,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .install-btn{background:var(--gold);color:#000;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 .install-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px}
 
-/* âââ MISC âââ */
+/* ─── MISC ─── */
 .no-data{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px}
 .no-data .nd-icon{font-size:36px;margin-bottom:8px}
 </style>
@@ -181,34 +181,34 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
 <!-- SETUP SCREEN (shows if no API key) -->
 <div id="setupScreen">
-  <div style="font-size:52px">ð</div>
-  <div class="setup-title">à¸à¸±à¸à¸à¸¶à¸à¹à¸à¸£à¸ XAU/USD</div>
-  <div class="setup-desc">à¹à¸ªà¹ Google Sheets API Key à¹à¸à¸·à¹à¸­à¹à¸à¸·à¹à¸­à¸¡à¸à¹à¸­ Trading Journal</div>
+  <div style="font-size:52px">📈</div>
+  <div class="setup-title">บันทึกเทรด XAU/USD</div>
+  <div class="setup-desc">ใส่ Google Sheets API Key เพื่อเชื่อมต่อ Trading Journal</div>
   <input id="apiKeyInput" class="setup-input" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
-  <button class="setup-btn" onclick="saveApiKey()">à¹à¸à¸·à¹à¸­à¸¡à¸à¹à¸­</button>
-  <div class="setup-note">ð Key à¹à¸à¹à¸à¹à¸§à¹à¹à¸à¸­à¸¸à¸à¸à¸£à¸à¹à¸à¸µà¹à¹à¸à¹à¸²à¸à¸±à¹à¸ à¹à¸¡à¹à¸ªà¹à¸à¹à¸à¸à¸µà¹à¹à¸«à¸<br>à¸ªà¸£à¹à¸²à¸ API Key à¹à¸à¹à¸à¸µà¹ console.cloud.google.com</div>
+  <button class="setup-btn" onclick="saveApiKey()">เชื่อมต่อ</button>
+  <div class="setup-note">🔒 Key เก็บไว้ในอุปกรณ์นี้เท่านั้น ไม่ส่งไปที่ไหน<br>สร้าง API Key ได้ที่ console.cloud.google.com</div>
 </div>
 
 <!-- LOADING -->
 <div id="loadingScreen" style="display:none">
   <div class="spinner"></div>
-  <div class="load-text" id="loadText">à¸à¸³à¸¥à¸±à¸à¹à¸«à¸¥à¸à¸à¹à¸­à¸¡à¸¹à¸¥...</div>
+  <div class="load-text" id="loadText">กำลังโหลดข้อมูล...</div>
 </div>
 
 <!-- MAIN APP -->
 <div id="app" style="display:none">
   <!-- TOP BAR -->
   <div id="topbar">
-    <div class="app-title">ð XAU/USD</div>
+    <div class="app-title">📈 XAU/USD</div>
     <select id="monthSel" onchange="switchMonth(this.value)"></select>
-    <button id="refreshBtn" onclick="loadData(true)" title="à¸£à¸µà¹à¸à¸£à¸">â»</button>
+    <button id="refreshBtn" onclick="loadData(true)" title="รีเฟรช">↻</button>
   </div>
 
   <!-- INSTALL BANNER -->
   <div id="installBanner">
-    <div class="install-text">ð² à¸à¸´à¸à¸à¸±à¹à¸à¹à¸à¹à¸ App à¸à¸ homescreen</div>
-    <button class="install-btn" onclick="installApp()">à¸à¸´à¸à¸à¸±à¹à¸</button>
-    <button class="install-close" onclick="dismissInstall()">Ã</button>
+    <div class="install-text">📲 ติดตั้งเป็น App บน homescreen</div>
+    <button class="install-btn" onclick="installApp()">ติดตั้ง</button>
+    <button class="install-close" onclick="dismissInstall()">×</button>
   </div>
 
   <!-- ERROR BANNER -->
@@ -219,15 +219,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- OVERVIEW PAGE -->
     <div class="page active" id="pageOverview">
       <div class="equity-hero">
-        <div class="equity-label">Equity à¸à¸±à¸à¸à¸¸à¸à¸±à¸</div>
+        <div class="equity-label">Equity ปัจจุบัน</div>
         <div class="equity-val" id="heroEquity">$0.00</div>
-        <div class="equity-sub" id="heroDelta">â</div>
+        <div class="equity-sub" id="heroDelta">—</div>
       </div>
       <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-label">Win Rate (à¸§à¸±à¸)</div><div class="kpi-val" id="kpiWR">â</div><div class="kpi-sub" id="kpiWRsub"></div></div>
-        <div class="kpi-card"><div class="kpi-label">Day PF</div><div class="kpi-val" id="kpiPF">â</div><div class="kpi-sub">Profit Factor</div></div>
-        <div class="kpi-card"><div class="kpi-label">Max DD</div><div class="kpi-val" id="kpiDD" style="color:var(--red)">â</div><div class="kpi-sub">Drawdown</div></div>
-        <div class="kpi-card"><div class="kpi-label">à¹à¸à¸£à¸à¸à¸±à¹à¸à¸«à¸¡à¸</div><div class="kpi-val" id="kpiDays">â</div><div class="kpi-sub">à¸§à¸±à¸à¸à¸µà¹à¸¡à¸µà¹à¸à¸£à¸</div></div>
+        <div class="kpi-card"><div class="kpi-label">Win Rate (วัน)</div><div class="kpi-val" id="kpiWR">—</div><div class="kpi-sub" id="kpiWRsub"></div></div>
+        <div class="kpi-card"><div class="kpi-label">Day PF</div><div class="kpi-val" id="kpiPF">—</div><div class="kpi-sub">Profit Factor</div></div>
+        <div class="kpi-card"><div class="kpi-label">Max DD</div><div class="kpi-val" id="kpiDD" style="color:var(--red)">—</div><div class="kpi-sub">Drawdown</div></div>
+        <div class="kpi-card"><div class="kpi-label">เทรดทั้งหมด</div><div class="kpi-val" id="kpiDays">—</div><div class="kpi-sub">วันที่มีเทรด</div></div>
       </div>
       <div class="wl-bar-wrap">
         <div class="wl-bar-label"><span>Win Days</span><span id="wlPct">0%</span></div>
@@ -235,10 +235,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
         <div class="wl-counts"><span class="wl-win" id="wlWin">0W</span><span class="wl-loss" id="wlLoss">0L</span></div>
       </div>
       <div class="streak-card">
-        <div class="streak-emoji" id="streakEmoji">â¡</div>
+        <div class="streak-emoji" id="streakEmoji">⚡</div>
         <div class="streak-info">
           <div class="streak-title">Streak</div>
-          <div class="streak-val" id="streakVal">â</div>
+          <div class="streak-val" id="streakVal">—</div>
           <div class="streak-sub" id="streakSub"></div>
         </div>
       </div>
@@ -247,10 +247,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- CALENDAR PAGE -->
     <div class="page" id="pageCalendar">
       <div class="cal-section">
-        <div class="section-title" id="calTitle">à¸à¸à¸´à¸à¸´à¸à¸à¸²à¸£à¹à¸à¸£à¸</div>
+        <div class="section-title" id="calTitle">ปฏิทินการเทรด</div>
         <div class="cal-header">
-          <div class="cal-dow">à¸­à¸²</div><div class="cal-dow">à¸</div><div class="cal-dow">à¸­</div>
-          <div class="cal-dow">à¸</div><div class="cal-dow">à¸à¸¤</div><div class="cal-dow">à¸¨</div><div class="cal-dow">à¸ª</div>
+          <div class="cal-dow">อา</div><div class="cal-dow">จ</div><div class="cal-dow">อ</div>
+          <div class="cal-dow">พ</div><div class="cal-dow">พฤ</div><div class="cal-dow">ศ</div><div class="cal-dow">ส</div>
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
@@ -259,11 +259,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- CHART PAGE -->
     <div class="page" id="pageChart">
       <div class="chart-card">
-        <div class="chart-title">ð Equity Curve</div>
+        <div class="chart-title">📈 Equity Curve</div>
         <div class="chart-wrap"><canvas id="eqChart"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">ð P/L à¸£à¸²à¸¢à¹à¸à¸·à¸­à¸</div>
+        <div class="chart-title">📊 P/L รายเดือน</div>
         <div class="chart-wrap"><canvas id="barChart"></canvas></div>
       </div>
     </div>
@@ -271,13 +271,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <!-- HISTORY PAGE -->
     <div class="page" id="pageHistory">
       <div class="cal-section">
-        <div class="section-title">à¸ªà¸£à¸¸à¸à¸£à¸²à¸¢à¹à¸à¸·à¸­à¸</div>
+        <div class="section-title">สรุปรายเดือน</div>
         <table class="hist-table">
           <thead>
             <tr>
-              <th style="text-align:left">à¹à¸à¸·à¸­à¸</th>
+              <th style="text-align:left">เดือน</th>
               <th style="text-align:right">P/L ($)</th>
-              <th style="text-align:right">à¹à¸à¸£à¸</th>
+              <th style="text-align:right">เทรด</th>
               <th style="text-align:right">Win Rate</th>
             </tr>
           </thead>
@@ -289,44 +289,44 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
   <!-- BOTTOM NAV -->
   <nav id="navbar">
-    <button class="nav-tab active" onclick="showPage('Overview',this)"><div class="icon">ð </div>Overview</button>
-    <button class="nav-tab" onclick="showPage('Calendar',this)"><div class="icon">ð</div>à¸à¸à¸´à¸à¸´à¸</button>
-    <button class="nav-tab" onclick="showPage('Chart',this)"><div class="icon">ð</div>à¸à¸£à¸²à¸</button>
-    <button class="nav-tab" onclick="showPage('History',this)"><div class="icon">ð</div>à¸à¸£à¸°à¸§à¸±à¸à¸´</button>
+    <button class="nav-tab active" onclick="showPage('Overview',this)"><div class="icon">🏠</div>Overview</button>
+    <button class="nav-tab" onclick="showPage('Calendar',this)"><div class="icon">📅</div>ปฏิทิน</button>
+    <button class="nav-tab" onclick="showPage('Chart',this)"><div class="icon">📈</div>กราฟ</button>
+    <button class="nav-tab" onclick="showPage('History',this)"><div class="icon">📋</div>ประวัติ</button>
   </nav>
 </div>
 
 <script>
-// âââ CONFIG âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SHEET_ID = '14Tk2JKc_TKbnE3qHlim9f9gqzxo-ujGN0o7m37h0qNg';
 const INIT_CAP = 300.01;
 
 const MONTH_CONFIGS = {
-  '01':{ daysInMonth:31,firstDayCol:4,full:'à¸¡à¸à¸£à¸²à¸à¸¡ 2026',abbr:'à¸¡.à¸.' },
-  '02':{ daysInMonth:28,firstDayCol:0,full:'à¸à¸¸à¸¡à¸ à¸²à¸à¸±à¸à¸à¹ 2026',abbr:'à¸.à¸.' },
-  '03':{ daysInMonth:31,firstDayCol:0,full:'à¸¡à¸µà¸à¸²à¸à¸¡ 2026',abbr:'à¸¡à¸µ.à¸.' },
-  '04':{ daysInMonth:30,firstDayCol:3,full:'à¹à¸¡à¸©à¸²à¸¢à¸ 2026',abbr:'à¹à¸¡.à¸¢.' },
-  '05':{ daysInMonth:31,firstDayCol:5,full:'à¸à¸¤à¸©à¸ à¸²à¸à¸¡ 2026',abbr:'à¸.à¸.' },
-  '06':{ daysInMonth:30,firstDayCol:1,full:'à¸¡à¸´à¸à¸¸à¸à¸²à¸¢à¸ 2026',abbr:'à¸¡à¸´.à¸¢.' },
-  '07':{ daysInMonth:31,firstDayCol:3,full:'à¸à¸£à¸à¸à¸²à¸à¸¡ 2026',abbr:'à¸.à¸.' },
-  '08':{ daysInMonth:31,firstDayCol:6,full:'à¸ªà¸´à¸à¸«à¸²à¸à¸¡ 2026',abbr:'à¸ª.à¸.' },
-  '09':{ daysInMonth:30,firstDayCol:2,full:'à¸à¸±à¸à¸¢à¸²à¸¢à¸ 2026',abbr:'à¸.à¸¢.' },
-  '10':{ daysInMonth:31,firstDayCol:4,full:'à¸à¸¸à¸¥à¸²à¸à¸¡ 2026',abbr:'à¸.à¸.' },
-  '11':{ daysInMonth:30,firstDayCol:0,full:'à¸à¸¤à¸¨à¸à¸´à¸à¸²à¸¢à¸ 2026',abbr:'à¸.à¸¢.' },
-  '12':{ daysInMonth:31,firstDayCol:2,full:'à¸à¸±à¸à¸§à¸²à¸à¸¡ 2026',abbr:'à¸.à¸.' },
+  '01':{ daysInMonth:31,firstDayCol:4,full:'มกราคม 2026',abbr:'ม.ค.' },
+  '02':{ daysInMonth:28,firstDayCol:0,full:'กุมภาพันธ์ 2026',abbr:'ก.พ.' },
+  '03':{ daysInMonth:31,firstDayCol:0,full:'มีนาคม 2026',abbr:'มี.ค.' },
+  '04':{ daysInMonth:30,firstDayCol:3,full:'เมษายน 2026',abbr:'เม.ย.' },
+  '05':{ daysInMonth:31,firstDayCol:5,full:'พฤษภาคม 2026',abbr:'พ.ค.' },
+  '06':{ daysInMonth:30,firstDayCol:1,full:'มิถุนายน 2026',abbr:'มิ.ย.' },
+  '07':{ daysInMonth:31,firstDayCol:3,full:'กรกฎาคม 2026',abbr:'ก.ค.' },
+  '08':{ daysInMonth:31,firstDayCol:6,full:'สิงหาคม 2026',abbr:'ส.ค.' },
+  '09':{ daysInMonth:30,firstDayCol:2,full:'กันยายน 2026',abbr:'ก.ย.' },
+  '10':{ daysInMonth:31,firstDayCol:4,full:'ตุลาคม 2026',abbr:'ต.ค.' },
+  '11':{ daysInMonth:30,firstDayCol:0,full:'พฤศจิกายน 2026',abbr:'พ.ย.' },
+  '12':{ daysInMonth:31,firstDayCol:2,full:'ธันวาคม 2026',abbr:'ธ.ค.' },
 };
-const MONTH_ORDER = ['à¸¡.à¸.','à¸.à¸.','à¸¡à¸µ.à¸.','à¹à¸¡.à¸¢.','à¸.à¸.','à¸¡à¸´.à¸¢.','à¸.à¸.','à¸ª.à¸.','à¸.à¸¢.','à¸.à¸.','à¸.à¸¢.','à¸.à¸.'];
-const ABBR_TO_KEY = {'à¸¡.à¸.':'01','à¸.à¸.':'02','à¸¡à¸µ.à¸.':'03','à¹à¸¡.à¸¢.':'04','à¸.à¸.':'05','à¸¡à¸´.à¸¢.':'06','à¸.à¸.':'07','à¸ª.à¸.':'08','à¸.à¸¢.':'09','à¸.à¸.':'10','à¸.à¸¢.':'11','à¸.à¸.':'12'};
-const NUM_TO_ABBR = {1:'à¸¡.à¸.',2:'à¸.à¸.',3:'à¸¡à¸µ.à¸.',4:'à¹à¸¡.à¸¢.',5:'à¸.à¸.',6:'à¸¡à¸´.à¸¢.',7:'à¸.à¸.',8:'à¸ª.à¸.',9:'à¸.à¸¢.',10:'à¸.à¸.',11:'à¸.à¸¢.',12:'à¸.à¸.'};
+const MONTH_ORDER = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const ABBR_TO_KEY = {'ม.ค.':'01','ก.พ.':'02','มี.ค.':'03','เม.ย.':'04','พ.ค.':'05','มิ.ย.':'06','ก.ค.':'07','ส.ค.':'08','ก.ย.':'09','ต.ค.':'10','พ.ย.':'11','ธ.ค.':'12'};
+const NUM_TO_ABBR = {1:'ม.ค.',2:'ก.พ.',3:'มี.ค.',4:'เม.ย.',5:'พ.ค.',6:'มิ.ย.',7:'ก.ค.',8:'ส.ค.',9:'ก.ย.',10:'ต.ค.',11:'พ.ย.',12:'ธ.ค.'};
 
-// âââ STATE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let _data = null;
 let _apiKey = null;
 let _selectedMonth = null;
 let _eqChart = null, _barChart = null;
 let _deferredInstall = null;
 
-// âââ PWA INSTALL âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── PWA INSTALL ─────────────────────────────────────────────────────────────
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _deferredInstall = e;
@@ -343,25 +343,25 @@ function dismissInstall() {
   document.getElementById('installBanner').classList.remove('show');
 }
 
-// âââ SERVICE WORKER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── SERVICE WORKER ───────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 
-// âââ API KEY SETUP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── API KEY SETUP ────────────────────────────────────────────────────────────
 function getApiKey() {
   return localStorage.getItem('gSheetApiKey') || null;
 }
 function saveApiKey() {
   const k = document.getElementById('apiKeyInput').value.trim();
-  if (!k) return alert('à¸à¸£à¸¸à¸à¸²à¹à¸ªà¹ API Key');
+  if (!k) return alert('กรุณาใส่ API Key');
   localStorage.setItem('gSheetApiKey', k);
   _apiKey = k;
   document.getElementById('setupScreen').style.display = 'none';
   init();
 }
 
-// âââ FETCH SHEETS DATA ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── FETCH SHEETS DATA ────────────────────────────────────────────────────────
 async function fetchSheetRows(apiKey) {
   // Step 1: get sheet metadata to find tab names
   const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${apiKey}&fields=sheets.properties`;
@@ -369,7 +369,7 @@ async function fetchSheetRows(apiKey) {
   if (meta.error) throw new Error(meta.error.message);
 
   const sheets = (meta.sheets || []).map(s => s.properties.title);
-  if (!sheets.length) throw new Error('à¹à¸¡à¹à¸à¸ Sheet');
+  if (!sheets.length) throw new Error('ไม่พบ Sheet');
 
   // Step 2: batch fetch all tabs
   const ranges = sheets.map(s => encodeURIComponent(s));
@@ -388,7 +388,7 @@ async function fetchSheetRows(apiKey) {
   return text;
 }
 
-// âââ PARSERS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── PARSERS ─────────────────────────────────────────────────────────────────
 function parseAllMonthlyPnL(content) {
   // Match DD/M/YYYY | amount rows (handles $, backslash, negative)
   const re = /\| (\d{1,2})\/(\d{1,2})\/(2026) \| (\\?-?\$?[\d,.]+) \|/g;
@@ -427,7 +427,7 @@ function parseMonthlyData(content) {
   const idx = content.indexOf('Monthly Summary 2026');
   if (idx < 0) return {};
   const chunk = content.slice(idx, idx+2000);
-  const rows = [...chunk.matchAll(/\| (à¸¡\.à¸\.|à¸\.à¸\.|à¸¡à¸µ\.à¸\.|à¹à¸¡\.à¸¢\.|à¸\.à¸\.|à¸¡à¸´\.à¸¢\.|à¸\.à¸\.|à¸ª\.à¸\.|à¸\.à¸¢\.|à¸\.à¸\.|à¸\.à¸¢\.|à¸\.à¸\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%) \|/g)];
+  const rows = [...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%) \|/g)];
   const out = {};
   for (const r of rows) {
     const abbr = r[1];
@@ -470,7 +470,7 @@ function processData(content) {
   // Detect current month (most recent with trades)
   let curAbbr = null, curKey = null;
   // Try indexOf approach first
-  const ABBRS = ['à¸.à¸.','à¸.à¸¢.','à¸.à¸.','à¸.à¸¢.','à¸ª.à¸.','à¸.à¸.','à¸¡à¸´.à¸¢.','à¸.à¸.','à¹à¸¡.à¸¢.','à¸¡à¸µ.à¸.','à¸.à¸.','à¸¡.à¸.'];
+  const ABBRS = ['ธ.ค.','พ.ย.','ต.ค.','ก.ย.','ส.ค.','ก.ค.','มิ.ย.','พ.ค.','เม.ย.','มี.ค.','ก.พ.','ม.ค.'];
   for (const a of ABBRS) {
     if (content.indexOf('\\[merged\\] '+a+' 20') !== -1) { curAbbr = a; break; }
   }
@@ -494,7 +494,7 @@ function processData(content) {
   return { allMonthPnL, monthly, cumulEq, curAbbr, curKey };
 }
 
-// âââ LOAD DATA ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── LOAD DATA ────────────────────────────────────────────────────────────────
 async function loadData(force=false) {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spin');
@@ -504,19 +504,19 @@ async function loadData(force=false) {
     const content = cached || await fetchSheetRows(_apiKey);
     if (!cached) sessionStorage.setItem('sheetContent', content);
     _data = processData(content);
-    _selectedMonth = _data.curAbbr || MONTH_ORDER.find(a=>_data.allMonthPnL[a]?.hasTrades) || 'à¸.à¸.';
+    _selectedMonth = _data.curAbbr || MONTH_ORDER.find(a=>_data.allMonthPnL[a]?.hasTrades) || 'ก.ค.';
     buildMonthDropdown();
     renderAll();
   } catch(e) {
-    showError('à¹à¸«à¸¥à¸à¸à¹à¸­à¸¡à¸¹à¸¥à¹à¸¡à¹à¹à¸à¹: '+e.message);
+    showError('โหลดข้อมูลไม่ได้: '+e.message);
   }
   btn.classList.remove('spin');
 }
 
-// âââ UI HELPERS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── UI HELPERS ──────────────────────────────────────────────────────────────
 function showError(msg) {
   const el = document.getElementById('errorBanner');
-  if (msg) { el.textContent = 'â ï¸ '+msg; el.style.display='block'; }
+  if (msg) { el.textContent = '⚠️ '+msg; el.style.display='block'; }
   else el.style.display='none';
 }
 
@@ -524,7 +524,7 @@ function buildMonthDropdown() {
   const sel = document.getElementById('monthSel');
   const OPTS = MONTH_ORDER.filter(a => _data.allMonthPnL[a]?.hasTrades || _data.curAbbr===a);
   sel.innerHTML = OPTS.map(a => {
-    const label = a + (_data.curAbbr===a?' (à¸à¸±à¸à¸à¸¸à¸à¸±à¸)':'');
+    const label = a + (_data.curAbbr===a?' (ปัจจุบัน)':'');
     return `<option value="${a}"${a===_selectedMonth?' selected':''}>${label}</option>`;
   }).join('');
   if (!OPTS.includes(_selectedMonth) && OPTS.length) _selectedMonth = OPTS[OPTS.length-1];
@@ -543,7 +543,7 @@ function showPage(name, btn) {
   if (name==='Chart' && _data) renderCharts();
 }
 
-// âââ RENDER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── RENDER ───────────────────────────────────────────────────────────────────
 function renderAll() {
   if (!_data) return;
   const abbr = _selectedMonth;
@@ -558,9 +558,9 @@ function renderAll() {
   // Hero equity
   document.getElementById('heroEquity').textContent = '$'+endEq.toFixed(2);
   const dEl = document.getElementById('heroDelta');
-  if (delta > 0) dEl.innerHTML = `<span class="pos">+$${delta.toFixed(2)} à¹à¸à¸·à¸­à¸à¸à¸µà¹</span>`;
-  else if (delta < 0) dEl.innerHTML = `<span class="neg">-$${Math.abs(delta).toFixed(2)} à¹à¸à¸·à¸­à¸à¸à¸µà¹</span>`;
-  else dEl.innerHTML = `<span class="neu">à¸¢à¸±à¸à¹à¸¡à¹à¸¡à¸µà¹à¸à¸£à¸</span>`;
+  if (delta > 0) dEl.innerHTML = `<span class="pos">+$${delta.toFixed(2)} เดือนนี้</span>`;
+  else if (delta < 0) dEl.innerHTML = `<span class="neg">-$${Math.abs(delta).toFixed(2)} เดือนนี้</span>`;
+  else dEl.innerHTML = `<span class="neu">ยังไม่มีเทรด</span>`;
 
   // KPIs
   const wr = mData.winRateDay;
@@ -568,13 +568,13 @@ function renderAll() {
   const dd = computeMaxDD(cum.startEq, pnlMap);
   const tradeDays = mData.total || 0;
 
-  document.getElementById('kpiWR').textContent = wr || 'â';
-  document.getElementById('kpiWRsub').textContent = wr ? `${mData.wins}W / ${mData.losses}L` : 'à¸¢à¸±à¸à¹à¸¡à¹à¸¡à¸µà¸à¹à¸­à¸¡à¸¹à¸¥';
-  document.getElementById('kpiPF').textContent = pf || 'â';
+  document.getElementById('kpiWR').textContent = wr || '—';
+  document.getElementById('kpiWRsub').textContent = wr ? `${mData.wins}W / ${mData.losses}L` : 'ยังไม่มีข้อมูล';
+  document.getElementById('kpiPF').textContent = pf || '—';
   const ddEl = document.getElementById('kpiDD');
   ddEl.textContent = dd;
   ddEl.style.color = dd==='0.00%' ? 'var(--muted)' : 'var(--red)';
-  document.getElementById('kpiDays').textContent = tradeDays || 'â';
+  document.getElementById('kpiDays').textContent = tradeDays || '—';
 
   // Win/Loss bar
   const wPct = tradeDays>0 ? (mData.wins/tradeDays*100) : 0;
@@ -589,18 +589,18 @@ function renderAll() {
   const subEl = document.getElementById('streakSub');
   const emoEl = document.getElementById('streakEmoji');
   if (streak.val === 0) {
-    emoEl.textContent='â¡'; sEl.textContent='â'; subEl.textContent='à¸¢à¸±à¸à¹à¸¡à¹à¸¡à¸µà¸à¹à¸­à¸¡à¸¹à¸¥';
+    emoEl.textContent='⚡'; sEl.textContent='—'; subEl.textContent='ยังไม่มีข้อมูล';
   } else if (streak.type==='win') {
-    emoEl.textContent='ð¥'; sEl.textContent=`${streak.val} à¸§à¸±à¸`; sEl.style.color='var(--green)';
-    subEl.textContent='à¸à¸à¸°à¸à¹à¸­à¹à¸à¸·à¹à¸­à¸';
+    emoEl.textContent='🔥'; sEl.textContent=`${streak.val} วัน`; sEl.style.color='var(--green)';
+    subEl.textContent='ชนะต่อเนื่อง';
   } else {
-    emoEl.textContent='âï¸'; sEl.textContent=`${streak.val} à¸§à¸±à¸`; sEl.style.color='var(--red)';
-    subEl.textContent='à¹à¸à¹à¸à¹à¸­à¹à¸à¸·à¹à¸­à¸';
+    emoEl.textContent='❄️'; sEl.textContent=`${streak.val} วัน`; sEl.style.color='var(--red)';
+    subEl.textContent='แพ้ต่อเนื่อง';
   }
 
   // Calendar
   if (key && cfg) renderCalendar(pnlMap, key, cfg, abbr);
-  else document.getElementById('calGrid').innerHTML = '<div class="no-data"><div class="nd-icon">ð</div>à¹à¸¡à¹à¸¡à¸µà¸à¹à¸­à¸¡à¸¹à¸¥</div>';
+  else document.getElementById('calGrid').innerHTML = '<div class="no-data"><div class="nd-icon">📅</div>ไม่มีข้อมูล</div>';
 
   // History table
   renderHistory(abbr);
@@ -651,13 +651,13 @@ function renderHistory(curAbbr) {
     const pnlStr = pnl>0?'+$'+pnl.toFixed(2):pnl<0?'-$'+Math.abs(pnl).toFixed(2):'$0.00';
     if (pnl===0 && trades===0 && !isActive) continue;
     html += `<tr class="${cls}">
-      <td>${a}${isActive?' â':''}</td>
+      <td>${a}${isActive?' ◀':''}</td>
       <td style="text-align:right" class="${pnlCls}">${pnlStr}</td>
-      <td style="text-align:right;color:var(--muted)">${trades||'â'}</td>
-      <td style="text-align:right;color:var(--muted)">${wr||'â'}</td>
+      <td style="text-align:right;color:var(--muted)">${trades||'—'}</td>
+      <td style="text-align:right;color:var(--muted)">${wr||'—'}</td>
     </tr>`;
   }
-  tbody.innerHTML = html || '<tr><td colspan="4" class="no-data">à¸¢à¸±à¸à¹à¸¡à¹à¸¡à¸µà¸à¹à¸­à¸¡à¸¹à¸¥</td></tr>';
+  tbody.innerHTML = html || '<tr><td colspan="4" class="no-data">ยังไม่มีข้อมูล</td></tr>';
 }
 
 function renderCharts() {
@@ -670,7 +670,7 @@ function renderCharts() {
 
   // Equity curve
   const days = Object.keys(pnlMap).map(Number).sort((a,b)=>a-b);
-  const eqLabels = ['à¸à¹à¸à¹à¸à¸·à¸­à¸', ...days.map(d=>d+'')];
+  const eqLabels = ['ต้นเดือน', ...days.map(d=>d+'')];
   const eqVals = [Math.round(startEq*100)/100];
   let c = startEq;
   for (const d of days) { c += pnlMap[d]; eqVals.push(Math.round(c*100)/100); }
@@ -716,7 +716,7 @@ function renderCharts() {
   });
 }
 
-// âââ INIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
   document.getElementById('loadingScreen').style.display='flex';
   document.getElementById('app').style.display='none';
@@ -731,7 +731,7 @@ async function init() {
   }
 }
 
-// Bootstrap â API key hardcoded, no setup screen needed
+// Bootstrap — API key hardcoded, no setup screen needed
 const HARDCODED_KEY = 'AIzaSyDKKOy2U5xspZg1Nbq0edxpPCg7qV4_zmU';
 _apiKey = getApiKey() || HARDCODED_KEY;
 if (!getApiKey()) localStorage.setItem('gSheetApiKey', HARDCODED_KEY);
