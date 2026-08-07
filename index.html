@@ -496,7 +496,7 @@ function parseMonthlyData(content){
   const idx=content.indexOf('Monthly Summary 2026');
   if(idx<0)return{};
   const chunk=content.slice(idx,idx+2000);
-  const rows=[...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%) \|/g)];
+  const rows=[...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%)\s*\|/g)];
   const out={};
   for(const r of rows){const abbr=r[1],pnl=parseFloat(r[2].replace(',','')),trades=parseInt(r[3]),wr=r[4];if(!isNaN(pnl))out[abbr]={pnl,trades,winRate:wr};}
   return out;
