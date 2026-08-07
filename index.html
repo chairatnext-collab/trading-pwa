@@ -407,7 +407,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 </div><!-- /app -->
 
 <script>
-// ─── CONFIG ────────────────────────────────────────────────────────
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SHEET_ID = '14Tk2JKc_TKbnE3qHlim9f9gqzxo-ujGN0o7m37h0qNg';
 const INIT_CAP = 300.01;
 
@@ -427,12 +427,12 @@ const MONTH_CONFIGS = {
 };
 const MONTH_ORDER=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const ABBR_TO_KEY={'ม.ค.':'01','ก.พ.':'02','มี.ค.':'03','เม.ย.':'04','พ.ค.':'05','มิ.ย.':'06','ก.ค.':'07','ส.ค.':'08','ก.ย.':'09','ต.ค.':'10','พ.ย.':'11','ธ.ค.':'12'};
-const NUM_TO_ABBR={1:'ม.ค.',2:'ก.พ.',3:'มี.ค.',4:'เม.ย.',5:'พ.ค.',6:'มิ.ย.',7:'ก.ค.',8:'ส.ค.',9:'ก.ย.',10:'ต.ค.',11:'พ.ย.0e22.',12:'ธ.ค.'};
+const NUM_TO_ABBR={1:'ม.ค.',2:'ก.พ.',3:'มี.ค.',4:'เม.ย.',5:'พ.ค.',6:'มิ.ย.',7:'ก.ค.',8:'ส.ค.',9:'ก.ย.',10:'ต.ค.',11:'พ.ย.',12:'ธ.ค.'};
 
-// ─── STATE ──────────────────────────────────────────────────────────
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let _data=null,_apiKey=null,_selectedMonth=null,_eqChart=null,_barChart=null,_deferredInstall=null;
 
-// ─── PWA ─────────────────────────────────────────────────────────────
+// ─── PWA ─────────────────────────────────────────────────────────────────────
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();_deferredInstall=e;
   if(!localStorage.getItem('installDismissed'))document.getElementById('installBanner').classList.add('show');
@@ -441,7 +441,7 @@ function installApp(){if(_deferredInstall){_deferredInstall.prompt();_deferredIn
 function dismissInstall(){localStorage.setItem('installDismissed','1');document.getElementById('installBanner').classList.remove('show');}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// ─── API KEY ────────────────────────────────────────────────────────
+// ─── API KEY ──────────────────────────────────────────────────────────────────
 function getApiKey(){return localStorage.getItem('gSheetApiKey')||null;}
 function saveApiKey(){
   const k=document.getElementById('apiKeyInput').value.trim();
@@ -450,7 +450,7 @@ function saveApiKey(){
   document.getElementById('setupScreen').style.display='none';init();
 }
 
-// ─── FETCH ───────────────────────────────────────────────────────────
+// ─── FETCH ────────────────────────────────────────────────────────────────────
 async function fetchSheetRows(apiKey){
   const metaUrl=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${apiKey}&fields=sheets.properties`;
   const meta=await fetch(metaUrl).then(r=>r.json());
@@ -462,11 +462,11 @@ async function fetchSheetRows(apiKey){
   const batch=await fetch(batchUrl).then(r=>r.json());
   if(batch.error)throw new Error(batch.error.message);
   let text='';
-  for(const vr of(batch.valueRanges||[])){for(const row of(vr.values||[]))text+='| '+row.join(' | ')+' |\n';text+='\n';}
+  for(const vr of(batch.valueRanges||[])){for(const row of(vr.values||[]))text+='| '+row.join(' | ')+'  |\n';text+='\n';}
   return text;
 }
 
-// ─── PARSERS ─────────────────────────────────────────────────────────
+// ─── PARSERS ──────────────────────────────────────────────────────────────────
 function parseAllMonthlyPnL(content){
   const re=/\| (\d{1,2})\/(\d{1,2})\/(2026) \| (\\?-?\$?[\d,.]+) \|/g;
   const byAbbr={};let m;
@@ -560,7 +560,7 @@ function processData(content){
   return{allMonthPnL,monthly,cumulEq,curAbbr,curKey};
 }
 
-// ─── LOAD ──────────────────────────────────────────────────────────
+// ─── LOAD ─────────────────────────────────────────────────────────────────────
 async function loadData(force=false){
   const btn=document.getElementById('refreshBtn');
   btn.classList.add('spin');showError('');
@@ -575,7 +575,7 @@ async function loadData(force=false){
   btn.classList.remove('spin');
 }
 
-// ─── UI HELPERS ────────────────────────────────────────────────────
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
 function showError(msg){const el=document.getElementById('errorBanner');if(msg){el.textContent='⚠️ '+msg;el.style.display='block';}else el.style.display='none';}
 
 function buildMonthDropdown(){
@@ -595,7 +595,7 @@ function showPage(name,btn){
   if(name==='Chart'&&_data)renderCharts();
 }
 
-// ─── RENDER ──────────────────────────────────────────────────────
+// ─── RENDER ───────────────────────────────────────────────────────────────────
 function renderAll(){
   if(!_data)return;
   const abbr=_selectedMonth;
@@ -753,9 +753,9 @@ function renderHistory(curAbbr){
   let html='';
   for(const a of MONTH_ORDER){
     const m=_data.monthly[a],ap=_data.allMonthPnL[a];
-    const pnl=m?.pnl??ap?.deltaVal??0;
-    const trades=m?.trades??ap?.total??0;
-    const wr=m?.winRate??(ap?.winRateDay||null);
+    const pnl=ap?.deltaVal??m?.pnl??0;
+    const trades=ap?.total??m?.trades??0;
+    const wr=ap?.winRateDay??(m?.winRate&&parseFloat(m.winRate)<=100?m.winRate:null);
     const eq=_data.cumulEq[a]?.endEq??INIT_CAP;
     const isActive=a===curAbbr;
     if(pnl===0&&trades===0&&!isActive)continue;
@@ -827,7 +827,7 @@ function renderCharts(){
   });
 }
 
-// ─── INIT ──────────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init(){
   document.getElementById('loadingScreen').style.display='flex';
   document.getElementById('app').style.display='none';
