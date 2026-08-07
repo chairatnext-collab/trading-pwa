@@ -1,4 +1,4 @@
-const CACHE = 'trading-pwa-v1';
+const CACHE = 'trading-pwa-v2';
 const SHELL = ['./', './index.html', './manifest.json',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js'];
 
@@ -12,6 +12,6 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 self.addEventListener('fetch', e => {
-  if (e.request.url.includes('googleapis.com')) return;
+  if (e.request.url.includes('googleapis.com')) return; // always fresh
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
