@@ -1,4 +1,4 @@
-const CACHE = 'trading-pwa-v3';
+const CACHE = 'trading-pwa-v4';
 const SHELL = ['./', './index.html', './manifest.json',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js'];
 
