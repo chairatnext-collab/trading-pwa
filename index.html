@@ -496,9 +496,9 @@ function parseMonthlyData(content){
   const idx=content.indexOf('Monthly Summary 2026');
   if(idx<0)return{};
   const chunk=content.slice(idx,idx+2000);
-  const rows=[...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%)\s*\|/g)];
+  const rows=[...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%)\s*\|(?:\s*\$?([\d.,]*)\s*\|)?/g)];
   const out={};
-  for(const r of rows){const abbr=r[1],pnl=parseFloat(r[2].replace(',','')),trades=parseInt(r[3]),wr=r[4];if(!isNaN(pnl))out[abbr]={pnl,trades,winRate:wr};}
+  for(const r of rows){const abbr=r[1],pnl=parseFloat(r[2].replace(',','')),trades=parseInt(r[3]),wr=r[4],withdrawal=parseFloat((r[5]||'0').replace(',',''))||0;if(!isNaN(pnl))out[abbr]={pnl,trades,winRate:wr,withdrawal};}
   return out;
 }
 
@@ -556,7 +556,7 @@ function processData(content){
   if(!curAbbr)for(const a of[...MONTH_ORDER].reverse()){if(allMonthPnL[a]?.hasTrades){curAbbr=a;break;}}
   const curKey=curAbbr?ABBR_TO_KEY[curAbbr]:null;
   const cumulEq={};let running=INIT_CAP;
-  for(const a of MONTH_ORDER){const delta=allMonthPnL[a]?.deltaVal??monthly[a]?.pnl??0;cumulEq[a]={startEq:running,endEq:running+delta};running+=delta;}
+  for(const a of MONTH_ORDER){const delta=allMonthPnL[a]?.deltaVal??monthly[a]?.pnl??0;const wd=monthly[a]?.withdrawal??0;cumulEq[a]={startEq:running,endEq:running+delta-wd,withdrawal:wd};running+=delta-wd;}
   return{allMonthPnL,monthly,cumulEq,curAbbr,curKey};
 }
 
@@ -757,10 +757,12 @@ function renderHistory(curAbbr){
     const trades=ap?.total??m?.trades??0;
     const wr=ap?.winRateDay??(m?.winRate&&parseFloat(m.winRate)<=100?m.winRate:null);
     const eq=_data.cumulEq[a]?.endEq??INIT_CAP;
+    const wd=_data.cumulEq[a]?.withdrawal??0;
     const isActive=a===curAbbr;
     if(pnl===0&&trades===0&&!isActive)continue;
     const pc=pnl>0?'pnl-pos':pnl<0?'pnl-neg':'pnl-zero';
     const ps=pnl>0?'+$'+pnl.toFixed(2):pnl<0?'-$'+Math.abs(pnl).toFixed(2):'$0.00';
+    const wdTag=wd>0?`<div style="font-size:10px;color:var(--muted)">ถอน -$${wd.toFixed(2)}</div>`:'';
     html+=`<tr class="${isActive?'cur':''}">
       <td>${a}${isActive?'<span class="month-tag">▶</span>':''}</td>
       <td style="text-align:right" class="${pc}">${ps}</td>
