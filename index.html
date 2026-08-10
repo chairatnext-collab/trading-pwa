@@ -7,9 +7,864 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="เทรด XAU">
-<title>บันทึกเทรด XAU/USD</title>
+<title>บันทึกเทรด XAU/USD</title<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Name Next">
+<title>บันทึกการเทรดของ My Name Next</title>
 <link rel="manifest" href="./manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0d16;--bg2:#111520;--bg3:#181d2e;--bg4:#1e2438;
+  --border:#252d44;--border2:#2e3856;
+  --gold:#d4a72c;--gold2:#f0c040;--gold-dim:rgba(212,167,44,0.12);
+  --text:#e8eaf0;--text2:#b0b8d0;--muted:#6b7599;
+  --green:#22c55e;--green-dim:#15803d;--green-bg:rgba(34,197,94,0.1);
+  --red:#ef4444;--red-dim:#c0392b;--red-bg:rgba(239,68,68,0.1);
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* TOPBAR */
+#topbar{padding:calc(var(--safe-top) + 10px) 16px 10px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.app-title{font-size:15px;font-weight:700;color:var(--gold);flex:1}
+#monthSel{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;min-width:115px}
+#refreshBtn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--gold);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+#refreshBtn.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* NAV */
+#content{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(var(--safe-bot) + 68px)}
+#navbar{position:fixed;bottom:0;left:0;right:0;padding-bottom:var(--safe-bot);background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 0 5px;gap:2px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:9px;font-weight:500;transition:color .2s;position:relative}
+.nav-tab.active{color:var(--gold)}
+.nav-tab.active::after{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:var(--gold);border-radius:0 0 2px 2px}
+.nav-tab .icon{font-size:18px;line-height:1.2}
+
+/* PAGES */
+.page{display:none;padding:14px 14px 6px;animation:fadeIn .18s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+/* EQUITY HERO */
+.equity-hero{background:linear-gradient(145deg,#111827 0%,#1a2035 100%);border:1px solid var(--border2);border-radius:16px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.equity-hero::after{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(212,167,44,0.1),transparent 70%);pointer-events:none}
+.hero-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px}
+.equity-label{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.hero-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.hero-badge.pos{background:var(--green-bg);color:var(--green)}
+.hero-badge.neg{background:var(--red-bg);color:var(--red)}
+.hero-badge.neu{background:var(--bg4);color:var(--muted)}
+.equity-val{font-size:38px;font-weight:700;color:var(--gold2);line-height:1.1;letter-spacing:-1px}
+.hero-row3{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.hero-delta{font-size:12px}
+.hero-delta .pos{color:var(--green)}.hero-delta .neg{color:var(--red)}.hero-delta .neu{color:var(--muted)}
+.hero-sep{color:var(--border2)}
+.hero-ytd{font-size:11px;color:var(--muted)}
+.hero-ytd b{color:var(--text2)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px}
+.kpi-label{font-size:9px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* WIN/LOSS BAR */
+.wl-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.wl-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.wl-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.wl-pct{font-size:16px;font-weight:700;color:var(--text)}
+.wl-track{height:10px;border-radius:5px;background:var(--bg4);overflow:hidden;margin-bottom:6px}
+.wl-fill{height:100%;background:linear-gradient(90deg,var(--green-dim),var(--green));border-radius:5px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+.wl-counts{display:flex;justify-content:space-between;font-size:12px;font-weight:600}
+.wl-win{color:var(--green)}.wl-loss{color:var(--red)}
+
+/* BEST/WORST */
+.bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.bw-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px}
+.bw-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.bw-val{font-size:20px;font-weight:700;line-height:1}
+.bw-day{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* STREAK */
+.streak-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.streak-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.streak-icon.win{background:var(--green-bg)}.streak-icon.loss{background:var(--red-bg)}.streak-icon.none{background:var(--bg4)}
+.streak-info{flex:1}
+.streak-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.streak-val{font-size:22px;font-weight:700;line-height:1}
+.streak-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* STATS PAGE */
+.stats-hero{background:linear-gradient(145deg,#111827,#1a2035);border:1px solid var(--border2);border-radius:16px;padding:18px;margin-bottom:12px}
+.sh-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.sh-val{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1}
+.sh-val.pos{color:var(--green)}.sh-val.neg{color:var(--red)}.sh-val.neu{color:var(--muted)}
+.sh-sub{font-size:12px;color:var(--muted);margin-top:5px}
+.sh-sub b{color:var(--text2)}
+.sh-row{display:flex;gap:0;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.sh-mini{flex:1;text-align:center;border-right:1px solid var(--border)}
+.sh-mini:last-child{border-right:none}
+.sh-mini .lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.sh-mini .val{font-size:17px;font-weight:700;color:var(--text)}
+
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.stat-row:last-child{border-bottom:none;padding-bottom:0}
+.stat-row:first-child{padding-top:0}
+.slbl{font-size:13px;color:var(--text2)}
+.slbl small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+.sval{font-size:15px;font-weight:700}
+
+/* MONTHLY BARS */
+.mbar{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.mbar:last-child{margin-bottom:0}
+.mbar-lbl{font-size:10px;color:var(--muted);width:40px;text-align:right;flex-shrink:0}
+.mbar-track{flex:1;height:7px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.mbar-fill{height:100%;border-radius:4px}
+.mbar-val{font-size:10px;font-weight:600;width:58px;text-align:right;flex-shrink:0}
+
+/* CALENDAR */
+.cal-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.cal-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-title{font-size:13px;font-weight:600;color:var(--text)}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:3px}
+.cal-dow{text-align:center;font-size:9px;color:var(--muted);padding:3px 0;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg3);position:relative}
+.cal-day.empty{background:transparent}
+.cal-day.has-trade.win{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2)}
+.cal-day.has-trade.loss{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2)}
+.cal-day.today{border:2px solid var(--gold)!important}
+.cal-day .day-num{font-size:11px;font-weight:600;color:var(--text2)}
+.cal-day.has-trade .day-num{color:var(--text)}
+.cal-day .day-pnl{font-size:7.5px;font-weight:700;margin-top:1px}
+.cal-day.win .day-pnl{color:var(--green)}.cal-day.loss .day-pnl{color:var(--red)}
+.cal-footer{display:flex;gap:4px;justify-content:space-around;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.cal-stat{text-align:center;flex:1}
+.cal-stat .cs-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.cal-stat .cs-val{font-size:13px;font-weight:700;margin-top:2px}
+.cs-val.pos{color:var(--green)}.cs-val.neg{color:var(--red)}.cs-val.gold{color:var(--gold2)}
+
+/* CHART */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.chart-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.chart-title{font-size:13px;font-weight:600;color:var(--text)}
+.chart-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.chart-badge.pos{background:var(--green-bg);color:var(--green)}
+.chart-badge.neg{background:var(--red-bg);color:var(--red)}
+.chart-badge.neu{background:var(--bg4);color:var(--muted)}
+.chart-wrap{position:relative;height:175px}
+
+/* HISTORY */
+.hist-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.hist-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hist-table{width:100%;border-collapse:collapse;font-size:12px}
+.hist-table th{font-size:9px;color:var(--muted);text-transform:uppercase;padding:5px 6px 8px;border-bottom:1px solid var(--border);font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.hist-table td{padding:9px 6px;border-bottom:1px solid var(--border);white-space:nowrap}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-table tr.cur td{background:rgba(212,167,44,0.05)}
+.pnl-pos{color:var(--green);font-weight:700}
+.pnl-neg{color:var(--red);font-weight:700}
+.pnl-zero{color:var(--muted)}
+.eq-col{color:var(--gold2);font-weight:600}
+.month-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;background:var(--gold-dim);color:var(--gold);margin-left:4px;vertical-align:middle}
+
+/* MISC */
+.no-data{text-align:center;padding:28px 16px;color:var(--muted);font-size:13px}
+.no-data .nd-icon{font-size:32px;margin-bottom:8px}
+#loadingScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999}
+.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+.load-text{color:var(--muted);font-size:13px}
+#errorBanner{display:none;background:var(--red-bg);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin:10px 14px 0;color:#fca5a5;font-size:12px}
+#setupScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:998;padding:24px;text-align:center}
+.setup-title{font-size:20px;font-weight:700;color:var(--gold)}
+.setup-desc{font-size:14px;color:var(--muted);line-height:1.6;max-width:320px}
+.setup-input{width:100%;max-width:340px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:12px 14px;font-size:14px}
+.setup-btn{width:100%;max-width:340px;background:var(--gold);color:#000;font-weight:700;border:none;border-radius:8px;padding:13px;font-size:15px;cursor:pointer}
+.setup-note{font-size:11px;color:var(--muted);max-width:320px;line-height:1.5}
+#installBanner{display:none;background:var(--bg2);border:1px solid var(--gold);border-radius:8px;margin:8px 14px 0;padding:10px 12px;flex-direction:row;align-items:center;gap:10px}
+#installBanner.show{display:flex}
+.install-text{flex:1;font-size:12px;color:var(--text)}
+.install-btn{background:var(--gold);color:#000;border:none;border-radius:6px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.install-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px}
+</style>
+</head>
+<body>
+
+<div id="setupScreen">
+  <div style="font-size:48px">📈</div>
+  <div class="setup-title">บันทึกการเทรดของ My Name Next</div>
+  <div class="setup-desc">ใส่ Google Sheets API Key เพื่อเชื่อมต่อ Trading Journal</div>
+  <input id="apiKeyInput" class="setup-input" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
+  <button class="setup-btn" onclick="saveApiKey()">เชื่อมต่อ</button>
+  <div class="setup-note">🔒 Key เก็บไว้ในอุปกรณ์นี้เท่านั้น ไม่ส่งไปที่ไหน</div>
+</div>
+
+<div id="loadingScreen" style="display:none">
+  <div class="spinner"></div>
+  <div class="load-text">กำลังโหลดข้อมูล...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="topbar">
+    <div class="app-title">บันทึกการเทรดของ My Name Next</div>
+    <select id="monthSel" onchange="switchMonth(this.value)"></select>
+    <button id="refreshBtn" onclick="loadData(true)" title="รีเฟรช">↻</button>
+  </div>
+
+  <div id="installBanner">
+    <div class="install-text">📲 ติดตั้งเป็น App บน homescreen</div>
+    <button class="install-btn" onclick="installApp()">ติดตั้ง</button>
+    <button class="install-close" onclick="dismissInstall()">×</button>
+  </div>
+
+  <div id="errorBanner"></div>
+
+  <div id="content">
+
+    <!-- ─── OVERVIEW ─── -->
+    <div class="page active" id="pageOverview">
+      <div class="equity-hero">
+        <div class="hero-row1">
+          <div class="equity-label">Equity ปัจจุบัน</div>
+          <div class="hero-badge neu" id="heroReturnBadge">—</div>
+        </div>
+        <div class="equity-val" id="heroEquity">$0.00</div>
+        <div class="hero-row3">
+          <div class="hero-delta" id="heroDelta">—</div>
+          <div class="hero-sep">·</div>
+          <div class="hero-ytd" id="heroYTD">YTD: —</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Win Rate (วัน)</div>
+          <div class="kpi-val" id="kpiWR">—</div>
+          <div class="kpi-sub" id="kpiWRsub">W / L</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">กำไร ÷ ขาดทุน</div>
+          <div class="kpi-val" id="kpiPF">—</div>
+          <div class="kpi-sub">Profit Factor</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">ขาดทุนสูงสุด</div>
+          <div class="kpi-val" id="kpiDD" style="color:var(--red)">—</div>
+          <div class="kpi-sub">จากจุดสูงสุด</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">กำไรเฉลี่ย/วัน</div>
+          <div class="kpi-val" id="kpiAvg">—</div>
+          <div class="kpi-sub">ผลลัพธ์คาดหวัง</div>
+        </div>
+      </div>
+
+      <div class="wl-wrap">
+        <div class="wl-hd">
+          <div class="wl-lbl">Win Days</div>
+          <div class="wl-pct" id="wlPct">0%</div>
+        </div>
+        <div class="wl-track"><div class="wl-fill" id="wlFill" style="width:0%"></div></div>
+        <div class="wl-counts"><span class="wl-win" id="wlWin">0W</span><span class="wl-loss" id="wlLoss">0L</span></div>
+      </div>
+
+      <div class="bw-grid">
+        <div class="bw-card">
+          <div class="bw-lbl">🏆 วันที่ดีสุด</div>
+          <div class="bw-val pnl-pos" id="bestDayVal">—</div>
+          <div class="bw-day" id="bestDayDate"></div>
+        </div>
+        <div class="bw-card">
+          <div class="bw-lbl">💥 วันที่แย่สุด</div>
+          <div class="bw-val pnl-neg" id="worstDayVal">—</div>
+          <div class="bw-day" id="worstDayDate"></div>
+        </div>
+      </div>
+
+      <div class="streak-card">
+        <div class="streak-icon none" id="streakIcon">⚡</div>
+        <div class="streak-info">
+          <div class="streak-lbl">สายปัจจุบัน</div>
+          <div class="streak-val" id="streakVal">—</div>
+          <div class="streak-sub" id="streakSub">ยังไม่มีข้อมูล</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── STATS ─── -->
+    <div class="page" id="pageStats">
+      <div class="stats-hero">
+        <div class="sh-label">P/L สะสม YTD 2026</div>
+        <div class="sh-val neu" id="ytdVal">$0.00</div>
+        <div class="sh-sub" id="ytdSub">Return: — | ทุนเริ่ม: $300.01</div>
+        <div class="sh-row">
+          <div class="sh-mini"><div class="lbl">เงินในพอร์ต</div><div class="val" id="ytdEquity">—</div></div>
+          <div class="sh-mini"><div class="lbl">วันที่เทรด</div><div class="val" id="ytdDays">—</div></div>
+          <div class="sh-mini"><div class="lbl">Win Rate</div><div class="val" id="ytdWR">—</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">สถิติเดือนที่เลือก</div>
+        <div class="stat-row">
+          <div class="slbl">กำไรเฉลี่ยต่อวัน<small>วันที่ได้กำไร</small></div>
+          <div class="sval pnl-pos" id="statAvgWin">—</div>
+        </div>
+        <div class="stat-row">
+          <div class="slbl">ขาดทุนเฉลี่ยต่อวัน<small>วันที่ขาดทุน</small></div>
+          <div class="sval pnl-neg" id="statAvgLoss">—</div>
+        </div>
+        <div class="stat-row">
+          <div class="slbl">ผลเฉลี่ยต่อวัน<small>ทุกวันที่เทรด</small></div>
+          <div class="sval" id="statExpectancy">—</div>
+        </div>
+        <div class="stat-row">
+          <div class="slbl">อัตราได้ต่อเสีย<small>กำไรเฉลี่ย ÷ ขาดทุนเฉลี่ย</small></div>
+          <div class="sval" id="statRR">—</div>
+        </div>
+        <div class="stat-row">
+          <div class="slbl">ชนะติดต่อสูงสุด<small>วันชนะต่อเนื่อง</small></div>
+          <div class="sval pnl-pos" id="statMaxWS">—</div>
+        </div>
+        <div class="stat-row">
+          <div class="slbl">แพ้ติดต่อสูงสุด<small>วันขาดทุนต่อเนื่อง</small></div>
+          <div class="sval pnl-neg" id="statMaxLS">—</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">P/L รายเดือน</div>
+        <div id="monthBars"></div>
+      </div>
+    </div>
+
+    <!-- ─── CALENDAR ─── -->
+    <div class="page" id="pageCalendar">
+      <div class="cal-section">
+        <div class="cal-title-row">
+          <div class="cal-title" id="calTitle">ปฏิทินการเทรด</div>
+        </div>
+        <div class="cal-header">
+          <div class="cal-dow">อา</div><div class="cal-dow">จ</div><div class="cal-dow">อ</div>
+          <div class="cal-dow">พ</div><div class="cal-dow">พฤ</div><div class="cal-dow">ศ</div><div class="cal-dow">ส</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-footer" id="calFooter"></div>
+      </div>
+    </div>
+
+    <!-- ─── CHART ─── -->
+    <div class="page" id="pageChart">
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div class="chart-title">📈 Equity Curve</div>
+          <div class="chart-badge neu" id="eqBadge">—</div>
+        </div>
+        <div class="chart-wrap"><canvas id="eqChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div class="chart-title">📊 P/L รายเดือน</div>
+          <div class="chart-badge neu" id="barBadge">YTD</div>
+        </div>
+        <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ─── HISTORY ─── -->
+    <div class="page" id="pageHistory">
+      <div class="hist-section">
+        <div class="section-title">สรุปรายเดือน</div>
+        <div class="hist-wrap">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">เดือน</th>
+                <th style="text-align:right">P/L</th>
+                <th style="text-align:right">Equity</th>
+                <th style="text-align:right">วัน</th>
+                <th style="text-align:right">Win%</th>
+              </tr>
+            </thead>
+            <tbody id="histBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <nav id="navbar">
+    <button class="nav-tab active" onclick="showPage('Overview',this)"><div class="icon">🏠</div>ภาพรวม</button>
+    <button class="nav-tab" onclick="showPage('Stats',this)"><div class="icon">📊</div>สถิติ</button>
+    <button class="nav-tab" onclick="showPage('Calendar',this)"><div class="icon">📅</div>ปฏิทิน</button>
+    <button class="nav-tab" onclick="showPage('Chart',this)"><div class="icon">📈</div>กราฟ</button>
+    <button class="nav-tab" onclick="showPage('History',this)"><div class="icon">📋</div>ประวัติ</button>
+  </nav>
+</div><!-- /app -->
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
+const SHEET_ID = '14Tk2JKc_TKbnE3qHlim9f9gqzxo-ujGN0o7m37h0qNg';
+const INIT_CAP = 300.01;
+
+const MONTH_CONFIGS = {
+  '01':{daysInMonth:31,firstDayCol:4,full:'มกราคม 2026',abbr:'ม.ค.'},
+  '02':{daysInMonth:28,firstDayCol:0,full:'กุมภาพันธ์ 2026',abbr:'ก.พ.'},
+  '03':{daysInMonth:31,firstDayCol:0,full:'มีนาคม 2026',abbr:'มี.ค.'},
+  '04':{daysInMonth:30,firstDayCol:3,full:'เมษายน 2026',abbr:'เม.ย.'},
+  '05':{daysInMonth:31,firstDayCol:5,full:'พฤษภาคม 2026',abbr:'พ.ค.'},
+  '06':{daysInMonth:30,firstDayCol:1,full:'มิถุนายน 2026',abbr:'มิ.ย.'},
+  '07':{daysInMonth:31,firstDayCol:3,full:'กรกฎาคม 2026',abbr:'ก.ค.'},
+  '08':{daysInMonth:31,firstDayCol:6,full:'สิงหาคม 2026',abbr:'ส.ค.'},
+  '09':{daysInMonth:30,firstDayCol:2,full:'กันยายน 2026',abbr:'ก.ย.'},
+  '10':{daysInMonth:31,firstDayCol:4,full:'ตุลาคม 2026',abbr:'ต.ค.'},
+  '11':{daysInMonth:30,firstDayCol:0,full:'พฤศจิกายน 2026',abbr:'พ.ย.'},
+  '12':{daysInMonth:31,firstDayCol:2,full:'ธันวาคม 2026',abbr:'ธ.ค.'},
+};
+const MONTH_ORDER=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const ABBR_TO_KEY={'ม.ค.':'01','ก.พ.':'02','มี.ค.':'03','เม.ย.':'04','พ.ค.':'05','มิ.ย.':'06','ก.ค.':'07','ส.ค.':'08','ก.ย.':'09','ต.ค.':'10','พ.ย.':'11','ธ.ค.':'12'};
+const NUM_TO_ABBR={1:'ม.ค.',2:'ก.พ.',3:'มี.ค.',4:'เม.ย.',5:'พ.ค.',6:'มิ.ย.',7:'ก.ค.',8:'ส.ค.',9:'ก.ย.',10:'ต.ค.',11:'พ.ย.',12:'ธ.ค.'};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let _data=null,_apiKey=null,_selectedMonth=null,_eqChart=null,_barChart=null,_deferredInstall=null;
+
+// ─── PWA ─────────────────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();_deferredInstall=e;
+  if(!localStorage.getItem('installDismissed'))document.getElementById('installBanner').classList.add('show');
+});
+function installApp(){if(_deferredInstall){_deferredInstall.prompt();_deferredInstall=null;}document.getElementById('installBanner').classList.remove('show');}
+function dismissInstall(){localStorage.setItem('installDismissed','1');document.getElementById('installBanner').classList.remove('show');}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+// ─── API KEY ──────────────────────────────────────────────────────────────────
+function getApiKey(){return localStorage.getItem('gSheetApiKey')||null;}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  if(!k)return alert('กรุณาใส่ API Key');
+  localStorage.setItem('gSheetApiKey',k);_apiKey=k;
+  document.getElementById('setupScreen').style.display='none';init();
+}
+
+// ─── FETCH ────────────────────────────────────────────────────────────────────
+async function fetchSheetRows(apiKey){
+  const metaUrl=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${apiKey}&fields=sheets.properties`;
+  const meta=await fetch(metaUrl).then(r=>r.json());
+  if(meta.error)throw new Error(meta.error.message);
+  const sheets=(meta.sheets||[]).map(s=>s.properties.title);
+  if(!sheets.length)throw new Error('ไม่พบ Sheet');
+  const ranges=sheets.map(s=>encodeURIComponent(s));
+  const batchUrl=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchGet?key=${apiKey}&valueRenderOption=FORMATTED_VALUE&${ranges.map(r=>'ranges='+r).join('&')}`;
+  const batch=await fetch(batchUrl).then(r=>r.json());
+  if(batch.error)throw new Error(batch.error.message);
+  let text='';
+  for(const vr of(batch.valueRanges||[])){for(const row of(vr.values||[]))text+='| '+row.join(' | ')+'  |\n';text+='\n';}
+  return text;
+}
+
+// ─── PARSERS ──────────────────────────────────────────────────────────────────
+function parseAllMonthlyPnL(content){
+  const re=/\| (\d{1,2})\/(\d{1,2})\/(2026) \| (\\?-?\$?[\d,.]+) \|/g;
+  const byAbbr={};let m;
+  while((m=re.exec(content))!==null){
+    const day=parseInt(m[1]),month=parseInt(m[2]),abbr=NUM_TO_ABBR[month];
+    if(!abbr)continue;
+    const pnl=parseFloat(m[4].replace(/[\\$,]/g,''));
+    if(isNaN(pnl)||pnl===0)continue;
+    if(!byAbbr[abbr])byAbbr[abbr]={pnl:{}};
+    byAbbr[abbr].pnl[day]=(byAbbr[abbr].pnl[day]||0)+pnl;
+  }
+  for(const abbr in byAbbr){
+    const vals=Object.values(byAbbr[abbr].pnl);
+    const wins=vals.filter(v=>v>0).length,losses=vals.filter(v=>v<0).length,total=wins+losses;
+    const delta=vals.reduce((s,v)=>s+v,0);
+    const gp=vals.filter(v=>v>0).reduce((s,v)=>s+v,0);
+    const gl=Math.abs(vals.filter(v=>v<0).reduce((s,v)=>s+v,0));
+    byAbbr[abbr]={pnl:byAbbr[abbr].pnl,wins,losses,total,deltaVal:delta,
+      winRateDay:total>0?(wins/total*100).toFixed(1)+'%':null,
+      dayPF:gl>0?(gp/gl).toFixed(2):(gp>0?'∞':null),
+      hasTrades:total>0,_gp:gp,_gl:gl};
+  }
+  return byAbbr;
+}
+
+function parseMonthlyData(content){
+  const idx=content.indexOf('Monthly Summary 2026');
+  if(idx<0)return{};
+  const chunk=content.slice(idx,idx+2000);
+  const rows=[...chunk.matchAll(/\| (ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.) \| \$?([\d.,-]+) \| (\d+) \| ([\d.]+%)\s*\|(?:\s*\$?([\d.,]*)\s*\|)?/g)];
+  const out={};
+  for(const r of rows){const abbr=r[1],pnl=parseFloat(r[2].replace(',','')),trades=parseInt(r[3]),wr=r[4],withdrawal=parseFloat((r[5]||'0').replace(',',''))||0;if(!isNaN(pnl))out[abbr]={pnl,trades,winRate:wr,withdrawal};}
+  return out;
+}
+
+function computeMaxDD(startEq,pnlMap){
+  const days=Object.keys(pnlMap).map(Number).sort((a,b)=>a-b);
+  let peak=startEq,eq=startEq,maxDD=0;
+  for(const d of days){eq+=pnlMap[d];if(eq>peak)peak=eq;const dd=peak>0?((eq-peak)/peak)*100:0;if(dd<maxDD)maxDD=dd;}
+  return maxDD<0?maxDD.toFixed(2)+'%':'0.00%';
+}
+
+function computeStreak(pnlMap){
+  const days=Object.keys(pnlMap).map(Number).sort((a,b)=>a-b);
+  if(!days.length)return{val:0,type:'none'};
+  let cur=0,type='none';
+  for(const d of days){
+    const v=pnlMap[d];
+    if(v>0){if(type==='win'||type==='none'){cur++;type='win';}else{cur=1;type='win';}}
+    else if(v<0){if(type==='loss'||type==='none'){cur++;type='loss';}else{cur=1;type='loss';}}
+  }
+  return{val:cur,type};
+}
+
+function computeStats(pnlMap){
+  const days=Object.keys(pnlMap).map(Number).sort((a,b)=>a-b);
+  if(!days.length)return null;
+  const winDays=days.filter(d=>pnlMap[d]>0),lossDays=days.filter(d=>pnlMap[d]<0);
+  const winAmts=winDays.map(d=>pnlMap[d]),lossAmts=lossDays.map(d=>Math.abs(pnlMap[d]));
+  const avgWin=winAmts.length?winAmts.reduce((s,v)=>s+v,0)/winAmts.length:0;
+  const avgLoss=lossAmts.length?lossAmts.reduce((s,v)=>s+v,0)/lossAmts.length:0;
+  const allVals=days.map(d=>pnlMap[d]);
+  const expectancy=allVals.reduce((s,v)=>s+v,0)/allVals.length;
+  let bestDay={day:null,val:-Infinity},worstDay={day:null,val:Infinity};
+  for(const d of days){if(pnlMap[d]>bestDay.val)bestDay={day:d,val:pnlMap[d]};if(pnlMap[d]<worstDay.val)worstDay={day:d,val:pnlMap[d]};}
+  let maxWS=0,maxLS=0,cw=0,cl=0;
+  for(const d of days){if(pnlMap[d]>0){cw++;cl=0;maxWS=Math.max(maxWS,cw);}else{cl++;cw=0;maxLS=Math.max(maxLS,cl);}}
+  return{avgWin,avgLoss,expectancy,bestDay,worstDay,maxWinStreak:maxWS,maxLossStreak:maxLS};
+}
+
+function computeYTD(allMonthPnL,cumulEq){
+  let ytdPnL=0,totalTrades=0,totalWins=0;
+  for(const a of MONTH_ORDER){const m=allMonthPnL[a];if(!m)continue;ytdPnL+=m.deltaVal||0;totalTrades+=m.total||0;totalWins+=m.wins||0;}
+  const lastActive=[...MONTH_ORDER].reverse().find(a=>allMonthPnL[a]?.hasTrades);
+  const currentEquity=lastActive?(cumulEq[lastActive]?.endEq??INIT_CAP):INIT_CAP;
+  const returnPct=(currentEquity-INIT_CAP)/INIT_CAP*100;
+  const ytdWR=totalTrades>0?(totalWins/totalTrades*100):0;
+  return{ytdPnL,totalTrades,totalWins,currentEquity,returnPct,ytdWR};
+}
+
+function processData(content){
+  const allMonthPnL=parseAllMonthlyPnL(content);
+  const monthly=parseMonthlyData(content);
+  let curAbbr=null;
+  const ABBRS=['ธ.ค.','พ.ย.','ต.ค.','ก.ย.','ส.ค.','ก.ค.','มิ.ย.','พ.ค.','เม.ย.','มี.ค.','ก.พ.','ม.ค.'];
+  for(const a of ABBRS){if(content.indexOf('\\[merged\\] '+a+' 20')!==-1){curAbbr=a;break;}}
+  if(!curAbbr)for(const a of[...MONTH_ORDER].reverse()){if(allMonthPnL[a]?.hasTrades){curAbbr=a;break;}}
+  const curKey=curAbbr?ABBR_TO_KEY[curAbbr]:null;
+  const cumulEq={};let running=INIT_CAP;
+  for(const a of MONTH_ORDER){const delta=allMonthPnL[a]?.deltaVal??monthly[a]?.pnl??0;const wd=monthly[a]?.withdrawal??0;cumulEq[a]={startEq:running,endEq:running+delta-wd,withdrawal:wd};running+=delta-wd;}
+  return{allMonthPnL,monthly,cumulEq,curAbbr,curKey};
+}
+
+// ─── LOAD ─────────────────────────────────────────────────────────────────────
+async function loadData(force=false){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spin');showError('');
+  try{
+    const cached=!force&&sessionStorage.getItem('sheetContent');
+    const content=cached||await fetchSheetRows(_apiKey);
+    if(!cached)sessionStorage.setItem('sheetContent',content);
+    _data=processData(content);
+    _selectedMonth=_data.curAbbr||MONTH_ORDER.find(a=>_data.allMonthPnL[a]?.hasTrades)||'ก.ค.';
+    buildMonthDropdown();renderAll();
+  }catch(e){showError('โหลดข้อมูลไม่ได้: '+e.message);}
+  btn.classList.remove('spin');
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function showError(msg){const el=document.getElementById('errorBanner');if(msg){el.textContent='⚠️ '+msg;el.style.display='block';}else el.style.display='none';}
+
+function buildMonthDropdown(){
+  const sel=document.getElementById('monthSel');
+  const OPTS=MONTH_ORDER.filter(a=>_data.allMonthPnL[a]?.hasTrades||_data.curAbbr===a);
+  sel.innerHTML=OPTS.map(a=>`<option value="${a}"${a===_selectedMonth?' selected':''}>${a}${a===_data.curAbbr?' ◀':''}</option>`).join('');
+  if(!OPTS.includes(_selectedMonth)&&OPTS.length)_selectedMonth=OPTS[OPTS.length-1];
+}
+
+function switchMonth(abbr){_selectedMonth=abbr;renderAll();}
+
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='Chart'&&_data)renderCharts();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderAll(){
+  if(!_data)return;
+  const abbr=_selectedMonth;
+  const mData=_data.allMonthPnL[abbr]||{};
+  const cum=_data.cumulEq[abbr]||{startEq:INIT_CAP,endEq:INIT_CAP};
+  const pnlMap=mData.pnl||{};
+  const delta=mData.deltaVal??0;
+  const endEq=cum.endEq;
+  const key=ABBR_TO_KEY[abbr];
+  const cfg=MONTH_CONFIGS[key]||{};
+  const ytd=computeYTD(_data.allMonthPnL,_data.cumulEq);
+  const stats=computeStats(pnlMap);
+
+  // ── Hero
+  document.getElementById('heroEquity').textContent='$'+endEq.toFixed(2);
+  const retPct=(endEq-INIT_CAP)/INIT_CAP*100;
+  const rb=document.getElementById('heroReturnBadge');
+  rb.textContent=(retPct>=0?'+':'')+retPct.toFixed(2)+'%';
+  rb.className='hero-badge '+(retPct>0?'pos':retPct<0?'neg':'neu');
+  const dEl=document.getElementById('heroDelta');
+  if(delta>0)dEl.innerHTML=`<span class="pos">+$${delta.toFixed(2)} เดือนนี้</span>`;
+  else if(delta<0)dEl.innerHTML=`<span class="neg">-$${Math.abs(delta).toFixed(2)} เดือนนี้</span>`;
+  else dEl.innerHTML=`<span class="neu">ยังไม่มีเทรด</span>`;
+  const ytdSign=ytd.ytdPnL>=0?'+':'';
+  document.getElementById('heroYTD').innerHTML=`YTD: <b>${ytdSign}$${ytd.ytdPnL.toFixed(2)}</b>`;
+
+  // ── KPIs
+  const wr=mData.winRateDay,pf=mData.dayPF;
+  const dd=computeMaxDD(cum.startEq,pnlMap);
+  const tradeDays=mData.total||0;
+  document.getElementById('kpiWR').textContent=wr||'—';
+  document.getElementById('kpiWRsub').textContent=wr?`${mData.wins}W / ${mData.losses}L`:'ยังไม่มีข้อมูล';
+  document.getElementById('kpiPF').textContent=pf||'—';
+  const ddEl=document.getElementById('kpiDD');
+  ddEl.textContent=dd;ddEl.style.color=dd==='0.00%'?'var(--green)':'var(--red)';
+  const avgEl=document.getElementById('kpiAvg');
+  if(stats){
+    const exp=stats.expectancy;
+    avgEl.textContent=(exp>=0?'+$':'-$')+Math.abs(exp).toFixed(2);
+    avgEl.style.color=exp>=0?'var(--green)':'var(--red)';
+  }else{avgEl.textContent='—';avgEl.style.color='var(--text)';}
+
+  // ── Win/Loss bar
+  const wPct=tradeDays>0?(mData.wins/tradeDays*100):0;
+  document.getElementById('wlPct').textContent=wPct.toFixed(0)+'%';
+  document.getElementById('wlFill').style.width=wPct+'%';
+  document.getElementById('wlWin').textContent=(mData.wins||0)+'W';
+  document.getElementById('wlLoss').textContent=(mData.losses||0)+'L';
+
+  // ── Best/Worst
+  if(stats&&stats.bestDay.day!==null){
+    document.getElementById('bestDayVal').textContent='+$'+stats.bestDay.val.toFixed(2);
+    document.getElementById('bestDayDate').textContent='วันที่ '+stats.bestDay.day+' '+abbr;
+  }else{document.getElementById('bestDayVal').textContent='—';document.getElementById('bestDayDate').textContent='';}
+  if(stats&&stats.worstDay.day!==null&&stats.worstDay.val<0){
+    document.getElementById('worstDayVal').textContent='-$'+Math.abs(stats.worstDay.val).toFixed(2);
+    document.getElementById('worstDayDate').textContent='วันที่ '+stats.worstDay.day+' '+abbr;
+  }else{document.getElementById('worstDayVal').textContent='—';document.getElementById('worstDayDate').textContent='';}
+
+  // ── Streak
+  const streak=computeStreak(pnlMap);
+  const sEl=document.getElementById('streakVal'),subEl=document.getElementById('streakSub'),iconEl=document.getElementById('streakIcon');
+  iconEl.className='streak-icon';
+  if(streak.val===0){iconEl.textContent='⚡';iconEl.classList.add('none');sEl.textContent='—';sEl.style.color='';subEl.textContent='ยังไม่มีข้อมูล';}
+  else if(streak.type==='win'){iconEl.textContent='🔥';iconEl.classList.add('win');sEl.textContent=streak.val+' วัน';sEl.style.color='var(--green)';subEl.textContent='ชนะต่อเนื่อง';}
+  else{iconEl.textContent='❄️';iconEl.classList.add('loss');sEl.textContent=streak.val+' วัน';sEl.style.color='var(--red)';subEl.textContent='แพ้ต่อเนื่อง';}
+
+  // ── Stats page
+  renderStats(abbr,stats,ytd);
+
+  // ── Calendar
+  if(key&&cfg)renderCalendar(pnlMap,key,cfg,abbr,mData,cum);
+  else document.getElementById('calGrid').innerHTML='<div class="no-data"><div class="nd-icon">📅</div>ไม่มีข้อมูล</div>';
+
+  // ── History
+  renderHistory(abbr);
+
+  // ── Charts if visible
+  if(document.getElementById('pageChart').classList.contains('active'))renderCharts();
+}
+
+function renderStats(abbr,stats,ytd){
+  // YTD hero
+  const yv=document.getElementById('ytdVal');
+  yv.textContent=(ytd.ytdPnL>=0?'+$':'-$')+Math.abs(ytd.ytdPnL).toFixed(2);
+  yv.className='sh-val '+(ytd.ytdPnL>0?'pos':ytd.ytdPnL<0?'neg':'neu');
+  const rs=ytd.returnPct>=0?'+':'';
+  document.getElementById('ytdSub').innerHTML=`Return: <b>${rs}${ytd.returnPct.toFixed(2)}%</b> | ทุนเริ่ม: <b>$${INIT_CAP.toFixed(2)}</b>`;
+  document.getElementById('ytdEquity').textContent='$'+ytd.currentEquity.toFixed(2);
+  document.getElementById('ytdDays').textContent=ytd.totalTrades||'—';
+  document.getElementById('ytdWR').textContent=ytd.totalTrades>0?ytd.ytdWR.toFixed(1)+'%':'—';
+
+  // Monthly stats
+  if(stats){
+    document.getElementById('statAvgWin').textContent=stats.avgWin>0?'+$'+stats.avgWin.toFixed(2):'—';
+    document.getElementById('statAvgLoss').textContent=stats.avgLoss>0?'-$'+stats.avgLoss.toFixed(2):'—';
+    const exp=stats.expectancy;
+    const expEl=document.getElementById('statExpectancy');
+    expEl.textContent=(exp>=0?'+$':'-$')+Math.abs(exp).toFixed(2);
+    expEl.className='sval '+(exp>=0?'pnl-pos':'pnl-neg');
+    const rr=stats.avgLoss>0?(stats.avgWin/stats.avgLoss).toFixed(2):'∞';
+    document.getElementById('statRR').textContent=rr+'R';
+    document.getElementById('statMaxWS').textContent=stats.maxWinStreak?stats.maxWinStreak+' วัน':'—';
+    document.getElementById('statMaxLS').textContent=stats.maxLossStreak?stats.maxLossStreak+' วัน':'—';
+  }else{
+    ['statAvgWin','statAvgLoss','statExpectancy','statRR','statMaxWS','statMaxLS'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('statExpectancy').className='sval';
+  }
+
+  // Monthly bars
+  const allVals=MONTH_ORDER.map(a=>Math.abs(_data.allMonthPnL[a]?.deltaVal??_data.monthly[a]?.pnl??0));
+  const maxV=Math.max(...allVals,0.01);
+  let html='';
+  for(const a of MONTH_ORDER){
+    const v=_data.allMonthPnL[a]?.deltaVal??_data.monthly[a]?.pnl??0;
+    if(v===0&&!_data.allMonthPnL[a]?.hasTrades)continue;
+    const pct=Math.abs(v)/maxV*100;
+    const col=v>=0?'var(--green)':'var(--red)';
+    const cls=v>0?'pnl-pos':v<0?'pnl-neg':'pnl-zero';
+    const str=v>0?'+$'+v.toFixed(2):v<0?'-$'+Math.abs(v).toFixed(2):'$0';
+    html+=`<div class="mbar"><div class="mbar-lbl">${a.slice(0,-1)}</div><div class="mbar-track"><div class="mbar-fill" style="width:${pct}%;background:${col}"></div></div><div class="mbar-val ${cls}">${str}</div></div>`;
+  }
+  document.getElementById('monthBars').innerHTML=html||'<div class="no-data">ยังไม่มีข้อมูล</div>';
+}
+
+function renderCalendar(pnlMap,key,cfg,abbr,mData,cum){
+  document.getElementById('calTitle').textContent=cfg.full||abbr;
+  const today=new Date(),todayD=today.getDate(),todayKey=ABBR_TO_KEY[abbr];
+  let html='';
+  for(let i=0;i<cfg.firstDayCol;i++)html+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=cfg.daysInMonth;d++){
+    const v=pnlMap[d],hasTrade=v!==undefined&&v!==0;
+    const isWin=hasTrade&&v>0,isLoss=hasTrade&&v<0;
+    const isToday=d===todayD&&parseInt(todayKey)===parseInt(key)&&today.getFullYear()===2026;
+    let cls='cal-day';
+    if(hasTrade)cls+=' has-trade '+(isWin?'win':'loss');
+    if(isToday)cls+=' today';
+    const ps=hasTrade?(isWin?'+':'')+v.toFixed(0):'';
+    html+=`<div class="${cls}"><div class="day-num">${d}</div>${hasTrade?`<div class="day-pnl">${ps}</div>`:''}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+
+  // Footer summary
+  const delta=mData?.deltaVal??0,total=mData?.total??0,wr=mData?.winRateDay;
+  const dd=computeMaxDD(cum?.startEq??INIT_CAP,pnlMap);
+  const dSign=delta>0?'+':'';const dCls=delta>0?'pos':delta<0?'neg':'gold';
+  document.getElementById('calFooter').innerHTML=`
+    <div class="cal-stat"><div class="cs-lbl">P/L</div><div class="cs-val ${dCls}">${delta!==0?(dSign+'$'+delta.toFixed(2)):'$0.00'}</div></div>
+    <div class="cal-stat"><div class="cs-lbl">วันเทรด</div><div class="cs-val gold">${total||'0'}</div></div>
+    <div class="cal-stat"><div class="cs-lbl">Win Rate</div><div class="cs-val">${wr||'—'}</div></div>
+    <div class="cal-stat"><div class="cs-lbl">Max DD</div><div class="cs-val ${dd==='0.00%'?'pos':'neg'}">${dd}</div></div>`;
+}
+
+function renderHistory(curAbbr){
+  let html='';
+  for(const a of MONTH_ORDER){
+    const m=_data.monthly[a],ap=_data.allMonthPnL[a];
+    const pnl=ap?.deltaVal??m?.pnl??0;
+    const trades=ap?.total??m?.trades??0;
+    const wr=ap?.winRateDay??(m?.winRate&&parseFloat(m.winRate)<=100?m.winRate:null);
+    const eq=_data.cumulEq[a]?.endEq??INIT_CAP;
+    const wd=_data.cumulEq[a]?.withdrawal??0;
+    const isActive=a===curAbbr;
+    if(pnl===0&&trades===0&&!isActive)continue;
+    const pc=pnl>0?'pnl-pos':pnl<0?'pnl-neg':'pnl-zero';
+    const ps=pnl>0?'+$'+pnl.toFixed(2):pnl<0?'-$'+Math.abs(pnl).toFixed(2):'$0.00';
+    const wdTag=wd>0?`<div style="font-size:10px;color:var(--muted)">ถอน -$${wd.toFixed(2)}</div>`:'';
+    html+=`<tr class="${isActive?'cur':''}">
+      <td>${a}${isActive?'<span class="month-tag">▶</span>':''}</td>
+      <td style="text-align:right" class="${pc}">${ps}</td>
+      <td style="text-align:right" class="eq-col">$${eq.toFixed(2)}</td>
+      <td style="text-align:right;color:var(--muted)">${trades||'—'}</td>
+      <td style="text-align:right;color:var(--muted)">${wr||'—'}</td>
+    </tr>`;
+  }
+  document.getElementById('histBody').innerHTML=html||'<tr><td colspan="5" class="no-data">ยังไม่มีข้อมูล</td></tr>';
+}
+
+function renderCharts(){
+  if(!_data)return;
+  const abbr=_selectedMonth,mData=_data.allMonthPnL[abbr]||{};
+  const cum=_data.cumulEq[abbr]||{startEq:INIT_CAP};
+  const pnlMap=mData.pnl||{},startEq=cum.startEq;
+
+  // Equity curve
+  const days=Object.keys(pnlMap).map(Number).sort((a,b)=>a-b);
+  const eqLabels=['ต้น',...days.map(d=>d+'')];
+  const eqVals=[Math.round(startEq*100)/100];
+  let c=startEq;
+  for(const d of days){c+=pnlMap[d];eqVals.push(Math.round(c*100)/100);}
+  const eqUp=eqVals[eqVals.length-1]>=eqVals[0];
+  const eqCol=eqUp?'#22c55e':'#ef4444';
+  const delta=eqVals[eqVals.length-1]-eqVals[0];
+  const eb=document.getElementById('eqBadge');
+  eb.textContent=(delta>=0?'+$':'-$')+Math.abs(delta).toFixed(2);
+  eb.className='chart-badge '+(delta>0?'pos':delta<0?'neg':'neu');
+
+  if(_eqChart){_eqChart.destroy();_eqChart=null;}
+  _eqChart=new Chart(document.getElementById('eqChart').getContext('2d'),{
+    type:'line',
+    data:{labels:eqLabels,datasets:[{data:eqVals,fill:true,tension:0.35,borderColor:eqCol,
+      backgroundColor:eqUp?'rgba(34,197,94,0.08)':'rgba(239,68,68,0.08)',
+      pointRadius:eqLabels.length<12?3:1,borderWidth:2,pointBackgroundColor:eqCol}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#14182b',padding:10,borderColor:'#252d44',borderWidth:1,callbacks:{label:c=>'$'+c.parsed.y.toFixed(2)}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:9},color:'#6b7599',maxTicksLimit:8}},
+              y:{grid:{color:'rgba(37,45,68,0.6)'},ticks:{font:{size:9},color:'#6b7599',callback:v=>'$'+v}}}}
+  });
+
+  // Bar chart
+  const bL=[],bV=[],bC=[];let ytdTot=0;
+  for(const a of MONTH_ORDER){
+    const v=_data.allMonthPnL[a]?.deltaVal??_data.monthly[a]?.pnl??0;
+    if(v===0&&!_data.allMonthPnL[a]?.hasTrades&&a!==abbr)continue;
+    bL.push(a.slice(0,-1));bV.push(parseFloat(v.toFixed(2)));
+    bC.push(v>=0?'rgba(34,197,94,0.75)':'rgba(239,68,68,0.75)');ytdTot+=v;
+  }
+  const bb=document.getElementById('barBadge');
+  bb.textContent='YTD '+(ytdTot>=0?'+$':'-$')+Math.abs(ytdTot).toFixed(2);
+  bb.className='chart-badge '+(ytdTot>0?'pos':ytdTot<0?'neg':'neu');
+
+  if(_barChart){_barChart.destroy();_barChart=null;}
+  _barChart=new Chart(document.getElementById('barChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:bL,datasets:[{data:bV,backgroundColor:bC,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.parsed.y>=0?'+':'')+'$'+Math.abs(c.parsed.y).toFixed(2)}}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7599'}},
+              y:{grid:{color:'rgba(37,45,68,0.6)'},ticks:{font:{size:9},color:'#6b7599',callback:v=>'$'+v}}}}
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+async function init(){
+  document.getElementById('loadingScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  try{
+    await loadData();
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+  }catch(e){
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    showError(e.message);
+  }
+}
+
+// Bootstrap
+const HARDCODED_KEY='AIzaSyDKKOy2U5xspZg1Nbq0edxpPCg7qV4_zmU';
+_apiKey=getApiKey()||HARDCODED_KEY;
+if(!getApiKey())localStorage.setItem('gSheetApiKey',HARDCODED_KEY);
+document.getElementById('setupScreen').style.display='none';
+init();
+</script>
+</body>
+</html>
+
+<link rel="manifest" href="./manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/cart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
