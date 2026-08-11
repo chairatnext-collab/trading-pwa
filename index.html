@@ -4,11 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0d16">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="My Name Next">
+<meta name="apple-mobile-web-app-title" content="บันทึกเทรด">
+<meta name="description" content="Trading Journal Dashboard — XAU/USD">
 <title>บันทึกการเทรดของ My Name Next</title>
 <link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%230f1117'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' fill='%23d4a72c'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230f1117'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' fill='%23d4a72c'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -177,7 +181,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 #loadingScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999}
 .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 .load-text{color:var(--muted);font-size:13px}
-#errorBanner{display:none;background:var(--red-bg);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin:10px 14px 0;color:#fca5a5;font-size:12px}
+#errorBanner{display:none;background:var(--red-bg);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 12px;margin:10px 14px 0;color:#fca5a5;font-size:12px;align-items:center;gap:10px}
+#errorBanner span{flex:1}
+#errorRetryBtn{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0}
 #setupScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:998;padding:24px;text-align:center}
 .setup-title{font-size:20px;font-weight:700;color:var(--gold)}
 .setup-desc{font-size:14px;color:var(--muted);line-height:1.6;max-width:320px}
@@ -203,8 +209,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 </div>
 
 <div id="loadingScreen" style="display:none">
+  <div style="font-size:36px">📈</div>
   <div class="spinner"></div>
-  <div class="load-text">กำลังโหลดข้อมูล...</div>
+  <div class="load-text">กำลังดึงข้อมูลจาก Google Sheets...</div>
 </div>
 
 <div id="app" style="display:none">
@@ -576,7 +583,11 @@ async function loadData(force=false){
 }
 
 // ─── UI HELPERS ───────────────────────────────────────────────────────────────
-function showError(msg){const el=document.getElementById('errorBanner');if(msg){el.textContent='⚠️ '+msg;el.style.display='block';}else el.style.display='none';}
+function showError(msg){
+  const el=document.getElementById('errorBanner');
+  if(msg){el.innerHTML=`<span>⚠️ ${msg}</span><button id="errorRetryBtn" onclick="loadData(true)">ลองใหม่</button>`;el.style.display='flex';}
+  else el.style.display='none';
+}
 
 function buildMonthDropdown(){
   const sel=document.getElementById('monthSel');
@@ -616,9 +627,9 @@ function renderAll(){
   rb.textContent=(retPct>=0?'+':'')+retPct.toFixed(2)+'%';
   rb.className='hero-badge '+(retPct>0?'pos':retPct<0?'neg':'neu');
   const dEl=document.getElementById('heroDelta');
-  if(delta>0)dEl.innerHTML<`<span class="pos">+$${delta.toFixed(2)} เดือนนี้</span>`;
+  if(delta>0)dEl.innerHTML=`<span class="pos">+$${delta.toFixed(2)} เดือนนี้</span>`;
   else if(delta<0)dEl.innerHTML=`<span class="neg">-$${Math.abs(delta).toFixed(2)} เดือนนี้</span>`;
-  else dEl.innerHTML<`<span class="neu">ยังไม่มีเทรด</span>`;
+  else dEl.innerHTML=`<span class="neu">ยังไม่มีเทรด</span>`;
   const ytdSign=ytd.ytdPnL>=0?'+':'';
   document.getElementById('heroYTD').innerHTML=`YTD: <b>${ytdSign}$${ytd.ytdPnL.toFixed(2)}</b>`;
 
@@ -824,7 +835,7 @@ function renderCharts(){
     data:{labels:bL,datasets:[{data:bV,backgroundColor:bC,borderRadius:4,borderSkipped:false}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>(c.parsed.y>=0?'+':'')+'$'+Math.abs(c.parsed.y).toFixed(2)}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6f7599'}},
+      scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#6b7599'}},
               y:{grid:{color:'rgba(37,45,68,0.6)'},ticks:{font:{size:9},color:'#6b7599',callback:v=>'$'+v}}}}
   });
 }
