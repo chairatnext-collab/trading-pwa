@@ -419,6 +419,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
       <div class="page" id="pageAI">
       <div class="section-title" style="margin:0 0 10px 2px">🤖 ผลวิเคราะห์ AI</div>
+            <div class="section" style="margin-bottom:12px">
+        <div class="section-title">วิเคราะห์ด้วย AI</div>
+        <input type="file" id="aiImgInput" accept="image/*" multiple style="width:100%;margin-bottom:8px;font-size:12px;color:var(--text2)">
+        <button onclick="analyzeWithClaude()" style="width:100%;padding:10px;background:var(--gold);color:#0a0d16;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">🤖 วิเคราะห์ด้วย AI</button>
+        <div id="aiAnalyzeStatus" style="font-size:11px;color:var(--muted);margin-top:6px"></div>
+      </div>
       <div id="aiList"></div>
     </div>
 
@@ -438,6 +444,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SHEET_ID = '14Tk2JKc_TKbnE3qHlim9f9gqzxo-ujGN0o7m37h0qNg';
 const INIT_CAP = 300.01;
+const CLAUDE_API_KEY = 'PASTE_YOUR_ANTHROPIC_API_KEY_HERE';
+const CLAUDE_MODEL = 'claude-sonnet-5';
 
 const MONTH_CONFIGS = {
   '01':{daysInMonth:31,firstDayCol:4,full:'มกราคม 2026',abbr:'ม.ค.'},
@@ -877,14 +885,82 @@ async function init(){
   }
 }
 
+function getLocalAnalysis(){
+  try{return JSON.parse(localStorage.getItem('aiAnalysisLocal')||'[]');}catch(e){return [];}
+}
+function saveLocalAnalysis(result){
+  const arr=getLocalAnalysis();
+  arr.push(result);
+  localStorage.setItem('aiAnalysisLocal',JSON.stringify(arr));
+}
+function fileToImageBlock(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const base64=reader.result.split(',')[1];
+      resolve({type:'image',source:{type:'base64',media_type:file.type,data:base64}});
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function analyzeWithClaude(){
+  const input=document.getElementById('aiImgInput');
+  const statusEl=document.getElementById('aiAnalyzeStatus');
+  const files=input.files;
+  if(!files||!files.length){statusEl.textContent='กรุณาเลือกรูป chart อย่างน้อย 1 รูป';return;}
+  if(!CLAUDE_API_KEY||CLAUDE_API_KEY==='PASTE_YOUR_ANTHROPIC_API_KEY_HERE'){
+    statusEl.textContent='ยังไม่ได้ตั้งค่า Claude API Key ในโค้ด';
+    return;
+  }
+  statusEl.textContent='กำลังวิเคราะห์...';
+  try{
+    const imageBlocks=await Promise.all(Array.from(files).map(fileToImageBlock));
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'x-api-key':CLAUDE_API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:CLAUDE_MODEL,
+        max_tokens:1024,
+        messages:[{
+          role:'user',
+          content:[
+            ...imageBlocks,
+            {type:'text',text:'วิเคราะห์กราฟที่แนบมา แล้วตอบกลับเป็น JSON เดียวเท่านั้น ห้ามมีข้อความอื่นนอกเหนือจาก JSON รูปแบบ: {"symbol":"ชื่อสินทรัพย์","direction":"BUY หรือ SELL","timeframe":"กรอบเวลาหลักที่ใช้","entry":ตัวเลข,"sl":ตัวเลข,"tp":ตัวเลข,"confidence":"สูง หรือ กลาง หรือ ต่ำ","reason":"เหตุผลสั้นๆเป็นภาษาไทย"}'}
+          ]
+        }]
+      })
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    const startIdx=text.indexOf('{');
+    const endIdx=text.lastIndexOf('}');
+    if(startIdx===-1||endIdx===-1)throw new Error('AI ไม่ได้ตอบเป็น JSON ที่อ่านได้');
+    const result=JSON.parse(text.slice(startIdx,endIdx+1));
+    result.timestamp=new Date().toISOString();
+    result.source='in-app';
+    saveLocalAnalysis(result);
+    statusEl.textContent='วิเคราะห์เสร็จแล้ว';
+    input.value='';
+    loadAIAnalysis();
+  }catch(e){
+    statusEl.textContent='เกิดข้อผิดพลาด: '+e.message;
+  }
+}
 async function loadAIAnalysis(){
+  let remote=[];
   try{
     const res=await fetch('./analysis.json?t='+Date.now());
-    const list=await res.json();
-    renderAIAnalysis(list);
-  }catch(e){
-    document.getElementById('aiList').innerHTML='<div class="no-data"><div class="nd-icon">🤖</div>โหลดข้อมูลไม่สำเร็จ</div>';
-  }
+    remote=await res.json();
+  }catch(e){}
+  const local=getLocalAnalysis();
+  renderAIAnalysis([...remote,...local]);
 }
 function renderAIAnalysis(list){
   const el=document.getElementById('aiList');
