@@ -179,6 +179,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 /* MISC */
 .no-data{text-align:center;padding:28px 16px;color:var(--muted);font-size:13px}
 .no-data .nd-icon{font-size:32px;margin-bottom:8px}
+.ai-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.ai-card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ai-symbol{font-weight:700;font-size:14px}
+.ai-dir{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+.ai-dir.buy{background:var(--green-bg);color:var(--green)}
+.ai-dir.sell{background:var(--red-bg);color:var(--red)}
+.ai-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.ai-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.ai-level-box{background:var(--bg3);border-radius:8px;padding:6px;text-align:center}
+.ai-level-lbl{font-size:9px;color:var(--muted);text-transform:uppercase}
+.ai-level-val{font-size:13px;font-weight:600}
+.ai-reason{font-size:12px;color:var(--text2);line-height:1.5;margin-top:2px}
 #loadingScreen{position:fixed;inset:0;background:var(--splash-bg) center/cover no-repeat,var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999}
 #loadingScreen::before{content:'';position:absolute;inset:0;background:rgba(8,6,4,0.72);z-index:-1}
 .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
@@ -405,6 +417,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       </div>
     </div>
 
+      <div class="page" id="pageAI">
+      <div class="section-title" style="margin:0 0 10px 2px">🤖 ผลวิเคราะห์ AI</div>
+      <div id="aiList"></div>
+    </div>
+
   </div><!-- /content -->
 
   <nav id="navbar">
@@ -413,6 +430,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     <button class="nav-tab" onclick="showPage('Calendar',this)"><div class="icon">📅</div>ปฏิทิน</button>
     <button class="nav-tab" onclick="showPage('Chart',this)"><div class="icon">📈</div>กราฟ</button>
     <button class="nav-tab" onclick="showPage('History',this)"><div class="icon">📋</div>ประวัติ</button>
+    <button class="nav-tab" onclick="showPage('AI',this)"><div class="icon">🤖</div>AI วิเคราะห์</button>
   </nav>
 </div><!-- /app -->
 
@@ -607,6 +625,7 @@ function showPage(name,btn){
   document.getElementById('page'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='Chart'&&_data)renderCharts();
+  if(name==='AI')loadAIAnalysis();
 }
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
@@ -856,6 +875,39 @@ async function init(){
     document.getElementById('app').style.display='flex';
     showError(e.message);
   }
+}
+
+async function loadAIAnalysis(){
+  try{
+    const res=await fetch('./analysis.json?t='+Date.now());
+    const list=await res.json();
+    renderAIAnalysis(list);
+  }catch(e){
+    document.getElementById('aiList').innerHTML='<div class="no-data"><div class="nd-icon">🤖</div>โหลดข้อมูลไม่สำเร็จ</div>';
+  }
+}
+function renderAIAnalysis(list){
+  const el=document.getElementById('aiList');
+  if(!list||!list.length){el.innerHTML='<div class="no-data"><div class="nd-icon">🤖</div>ยังไม่มีผลวิเคราะห์</div>';return;}
+  const sorted=[...list].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  el.innerHTML=sorted.map(a=>{
+    const dirClass=a.direction==='SELL'?'sell':'buy';
+    const dt=new Date(a.timestamp);
+    const dtStr=isNaN(dt)?(a.timestamp||''):dt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<div class="ai-card">
+      <div class="ai-card-hd">
+        <div class="ai-symbol">${a.symbol||''}</div>
+        <div class="ai-dir ${dirClass}">${a.direction||''}</div>
+      </div>
+      <div class="ai-meta">${a.timeframe||''} • ${dtStr}${a.confidence?' • ความมั่นใจ: '+a.confidence:''}</div>
+      <div class="ai-levels">
+        <div class="ai-level-box"><div class="ai-level-lbl">Entry</div><div class="ai-level-val">${a.entry??'-'}</div></div>
+        <div class="ai-level-box"><div class="ai-level-lbl">SL</div><div class="ai-level-val" style="color:var(--red)">${a.sl??'-'}</div></div>
+        <div class="ai-level-box"><div class="ai-level-lbl">TP</div><div class="ai-level-val" style="color:var(--green)">${a.tp??'-'}</div></div>
+      </div>
+      ${a.reason?`<div class="ai-reason">${a.reason}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
 // Bootstrap
