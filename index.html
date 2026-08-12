@@ -421,8 +421,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
       <div class="section-title" style="margin:0 0 10px 2px">🤖 ผลวิเคราะห์ AI</div>
             <div class="section" style="margin-bottom:12px">
         <div class="section-title">วิเคราะห์ด้วย AI</div>
-        <input type="file" id="aiImgInput" accept="image/*" multiple style="width:100%;margin-bottom:8px;font-size:12px;color:var(--text2)">
-        <button onclick="analyzeWithClaude()" style="width:100%;padding:10px;background:var(--gold);color:#0a0d16;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">🤖 วิเคราะห์ด้วย AI</button>
+                <button onclick="analyzeWithClaude()" style="width:100%;padding:10px;background:var(--gold);color:#0a0d16;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">🤖 วิเคราะห์สถิติด้วย AI</button>
         <div id="aiAnalyzeStatus" style="font-size:11px;color:var(--muted);margin-top:6px"></div>
       </div>
       <div id="aiList"></div>
@@ -893,29 +892,40 @@ function saveLocalAnalysis(result){
   arr.push(result);
   localStorage.setItem('aiAnalysisLocal',JSON.stringify(arr));
 }
-function fileToImageBlock(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>{
-      const base64=reader.result.split(',')[1];
-      resolve({type:'image',source:{type:'base64',media_type:file.type,data:base64}});
-    };
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
-  });
+function buildStatsSummaryText(){
+  if(!_data)return null;
+  const ytd=computeYTD(_data.allMonthPnL,_data.cumulEq);
+  const abbr=_selectedMonth;
+  const mData=_data.allMonthPnL[abbr]||{};
+  const cum=_data.cumulEq[abbr]||{startEq:INIT_CAP,endEq:INIT_CAP};
+  let lines=[];
+  lines.push('เดือนปัจจุบัน: '+abbr);
+  lines.push('Equity เริ่มต้นเดือน: $'+cum.startEq.toFixed(2)+', Equity ปัจจุบัน: $'+cum.endEq.toFixed(2));
+  lines.push('กำไร/ขาดทุนเดือนนี้: $'+(mData.deltaVal||0).toFixed(2));
+  lines.push('Win rate (วัน) เดือนนี้: '+(mData.winRateDay||'-'));
+  lines.push('Profit factor เดือนนี้: '+(mData.dayPF||'-'));
+  lines.push('จำนวนวันเทรดเดือนนี้: '+(mData.total||0)+' (ชนะ '+(mData.wins||0)+' วัน, แพ้ '+(mData.losses||0)+' วัน)');
+  lines.push('YTD กำไรรวม: $'+ytd.ytdPnL.toFixed(2)+', Return: '+ytd.returnPct.toFixed(2)+'%');
+  lines.push('');
+  lines.push('ประวัติรายเดือนทั้งหมด:');
+  for(const a of MONTH_ORDER){
+    const m=_data.allMonthPnL[a];
+    if(!m||!m.hasTrades)continue;
+    lines.push(a+': P/L $'+(m.deltaVal||0).toFixed(2)+', win rate '+(m.winRateDay||'-')+', PF '+(m.dayPF||'-')+', วันเทรด '+(m.total||0));
+  }
+  return lines.join('\n');
 }
 async function analyzeWithClaude(){
-  const input=document.getElementById('aiImgInput');
   const statusEl=document.getElementById('aiAnalyzeStatus');
-  const files=input.files;
-  if(!files||!files.length){statusEl.textContent='กรุณาเลือกรูป chart อย่างน้อย 1 รูป';return;}
+  if(!_data){statusEl.textContent='ยังไม่มีข้อมูลสถิติให้วิเคราะห์';return;}
   if(!CLAUDE_API_KEY||CLAUDE_API_KEY==='PASTE_YOUR_ANTHROPIC_API_KEY_HERE'){
     statusEl.textContent='ยังไม่ได้ตั้งค่า Claude API Key ในโค้ด';
     return;
   }
+  const summaryText=buildStatsSummaryText();
+  if(!summaryText){statusEl.textContent='ไม่มีข้อมูลสถิติให้วิเคราะห์';return;}
   statusEl.textContent='กำลังวิเคราะห์...';
   try{
-    const imageBlocks=await Promise.all(Array.from(files).map(fileToImageBlock));
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
@@ -929,25 +939,17 @@ async function analyzeWithClaude(){
         max_tokens:1024,
         messages:[{
           role:'user',
-          content:[
-            ...imageBlocks,
-            {type:'text',text:'วิเคราะห์กราฟที่แนบมา แล้วตอบกลับเป็น JSON เดียวเท่านั้น ห้ามมีข้อความอื่นนอกเหนือจาก JSON รูปแบบ: {"symbol":"ชื่อสินทรัพย์","direction":"BUY หรือ SELL","timeframe":"กรอบเวลาหลักที่ใช้","entry":ตัวเลข,"sl":ตัวเลข,"tp":ตัวเลข,"confidence":"สูง หรือ กลาง หรือ ต่ำ","reason":"เหตุผลสั้นๆเป็นภาษาไทย"}'}
-          ]
+          content:[{type:'text',text:'ข้อมูลสถิติการเทรด XAU/USD ของผู้ใช้:\n\n'+summaryText+'\n\nช่วยสรุปข้อสังเกตสำคัญและให้คำแนะนำสั้นๆ เป็นภาษาไทย ไม่เกิน 200 คำ ตอบเป็นข้อความล้วน ไม่ต้องใช้ markdown หรือ bullet point'}]
         }]
       })
     });
     const data=await resp.json();
     if(data.error)throw new Error(data.error.message);
     const text=(data.content&&data.content[0]&&data.content[0].text)||'';
-    const startIdx=text.indexOf('{');
-    const endIdx=text.lastIndexOf('}');
-    if(startIdx===-1||endIdx===-1)throw new Error('AI ไม่ได้ตอบเป็น JSON ที่อ่านได้');
-    const result=JSON.parse(text.slice(startIdx,endIdx+1));
-    result.timestamp=new Date().toISOString();
-    result.source='in-app';
+    if(!text)throw new Error('AI ไม่ได้ตอบกลับข้อความ');
+    const result={type:'stats',summary:text,timestamp:new Date().toISOString()};
     saveLocalAnalysis(result);
     statusEl.textContent='วิเคราะห์เสร็จแล้ว';
-    input.value='';
     loadAIAnalysis();
   }catch(e){
     statusEl.textContent='เกิดข้อผิดพลาด: '+e.message;
@@ -967,6 +969,17 @@ function renderAIAnalysis(list){
   if(!list||!list.length){el.innerHTML='<div class="no-data"><div class="nd-icon">🤖</div>ยังไม่มีผลวิเคราะห์</div>';return;}
   const sorted=[...list].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
   el.innerHTML=sorted.map(a=>{
+    if(a.type==='stats'){
+      const dt2=new Date(a.timestamp);
+      const dtStr2=isNaN(dt2)?(a.timestamp||''):dt2.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<div class="ai-card">
+        <div class="ai-card-hd">
+          <div class="ai-symbol">📊 สรุปสถิติจาก AI</div>
+        </div>
+        <div class="ai-meta">${dtStr2}</div>
+        <div class="ai-reason">${a.summary}</div>
+      </div>`;
+    }
     const dirClass=a.direction==='SELL'?'sell':'buy';
     const dt=new Date(a.timestamp);
     const dtStr=isNaN(dt)?(a.timestamp||''):dt.toLocaleString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
