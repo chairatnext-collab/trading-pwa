@@ -190,7 +190,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .ai-level-box{background:var(--bg3);border-radius:8px;padding:6px;text-align:center}
 .ai-level-lbl{font-size:9px;color:var(--muted);text-transform:uppercase}
 .ai-level-val{font-size:13px;font-weight:600}
-.ai-reason{font-size:12px;color:var(--text2);line-height:1.5;margin-top:2px}
+.ai-reason{font-size:13px;color:var(--text2);line-height:1.8;margin-top:4px;white-space:pre-line;letter-spacing:.1px}
 #loadingScreen{position:fixed;inset:0;background:var(--splash-bg) center/cover no-repeat,var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999}
 #loadingScreen::before{content:'';position:absolute;inset:0;background:rgba(8,6,4,0.72);z-index:-1}
 .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
@@ -947,7 +947,7 @@ async function analyzeWithClaude(){
         max_tokens:1024,
         messages:[{
           role:'user',
-          content:[{type:'text',text:'ข้อมูลสถิติการเทรด XAU/USD ของผู้ใช้:\n\n'+summaryText+'\n\nช่วยสรุปข้อสังเกตสำคัญและให้คำแนะนำสั้นๆ เป็นภาษาไทย ไม่เกิน 200 คำ ตอบเป็นข้อความล้วน ไม่ต้องใช้ markdown หรือ bullet point'}]
+          content:[{type:'text',text:'ข้อมูลสถิติการเทรด XAU/USD ของผู้ใช้:\n\n'+summaryText+'\n\nวิเคราะห์ข้อมูลนี้แบบมืออาชีพ เขียนเป็นภาษาไทยที่กระชับ อ่านเข้าใจง่าย แบ่งเป็น 3 ส่วนคั่นด้วยบรรทัดว่าง ได้แก่ ภาพรวมผลงาน, จุดที่ควรสังเกต, คำแนะนำ ขึ้นต้นแต่ละส่วนด้วยชื่อหัวข้อสั้นๆตามด้วยเครื่องหมาย : เท่านั้น ความยาวรวมไม่เกิน 200 คำ ห้ามใช้สัญลักษณ์ markdown เช่น # หรือ ** หรือเครื่องหมายดอกจัน'}]
         }]
       })
     });
