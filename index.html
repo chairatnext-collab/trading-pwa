@@ -443,7 +443,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 // ─── CONFIG ─────────────────────────────────────────────────────────────────
 const SHEET_ID = '14Tk2JKc_TKbnE3qHlim9f9gqzxo-ujGN0o7m37h0qNg';
 const INIT_CAP = 300.01;
-const CLAUDE_API_KEY = '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';
+function getClaudeApiKey(){
+  let k=localStorage.getItem('claudeApiKey');
+  if(!k){
+    k=prompt('ใส่ Claude API Key (เก็บในเครื่องนี้เท่านั้น ไม่ส่งไปที่อื่น):');
+    if(k){k=k.trim();localStorage.setItem('claudeApiKey',k);}
+  }
+  return k;
+}
 const CLAUDE_MODEL = 'claude-sonnet-5';
 
 const MONTH_CONFIGS = {
@@ -918,8 +925,9 @@ function buildStatsSummaryText(){
 async function analyzeWithClaude(){
   const statusEl=document.getElementById('aiAnalyzeStatus');
   if(!_data){statusEl.textContent='ยังไม่มีข้อมูลสถิติให้วิเคราะห์';return;}
-  if(!CLAUDE_API_KEY||CLAUDE_API_KEY==='PASTE_YOUR_ANTHROPIC_API_KEY_HERE'){
-    statusEl.textContent='ยังไม่ได้ตั้งค่า Claude API Key ในโค้ด';
+  const apiKey=getClaudeApiKey();
+  if(!apiKey){
+    statusEl.textContent='ต้องใส่ Claude API Key ก่อนใช้งาน';
     return;
   }
   const summaryText=buildStatsSummaryText();
@@ -930,7 +938,7 @@ async function analyzeWithClaude(){
       method:'POST',
       headers:{
         'content-type':'application/json',
-        'x-api-key':CLAUDE_API_KEY,
+        'x-api-key':apiKey,
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
