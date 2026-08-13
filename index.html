@@ -942,7 +942,7 @@ async function analyzeWithClaude(){
       },
       body:JSON.stringify({
         model:CLAUDE_MODEL,
-        max_tokens:2048,
+        max_tokens:4096,
         messages:[{
           role:'user',
           content:[{type:'text',text:'ข้อมูลสถิติการเทรด XAU/USD ของผู้ใช้:\n\n'+summaryText+'\n\nวิเคราะห์ข้อมูลนี้แบบมืออาชีพและละเอียด เขียนเป็นภาษาไทยที่อ่านเข้าใจง่าย แบ่งเป็น 3 ส่วนคั่นด้วยบรรทัดว่าง ได้แก่ ภาพรวมผลงาน, จุดที่ควรสังเกต, คำแนะนำ ขึ้นต้นแต่ละส่วนด้วยชื่อหัวข้อสั้นๆตามด้วยเครื่องหมาย : เท่านั้น แต่ละส่วนให้มีรายละเอียดที่เป็นประโยชน์ อ้างอิงตัวเลขจริงจากข้อมูลที่ให้มาประกอบคำอธิบาย ไม่ใช่แค่สรุปสั้นๆ ความยาวรวมประมาณ 400-600 คำ ห้ามใช้สัญลักษณ์ markdown เช่น # หรือ \*\* หรือเครื่องหมายดอกจัน'}]
@@ -951,7 +951,7 @@ async function analyzeWithClaude(){
     });
     const data=await resp.json();
     if(data.error)throw new Error(data.error.message);
-    const text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    const textBlock=(data.content||[]).find(b=>b.type==='text');const text=textBlock?textBlock.text:'';
     if(!text)throw new Error('AI ไม่ได้ตอบกลับข้อความ');
     const result={type:'stats',summary:text,timestamp:new Date().toISOString()};
     saveLocalAnalysis(result);
