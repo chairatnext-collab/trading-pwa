@@ -895,9 +895,7 @@ function getLocalAnalysis(){
   try{return JSON.parse(localStorage.getItem('aiAnalysisLocal')||'[]');}catch(e){return [];}
 }
 function saveLocalAnalysis(result){
-  const arr=getLocalAnalysis();
-  arr.push(result);
-  localStorage.setItem('aiAnalysisLocal',JSON.stringify(arr));
+  let arr=getLocalAnalysis();if(result.type==='stats')arr=arr.filter(x=>x.type!=='stats');arr.push(result);localStorage.setItem('aiAnalysisLocal',JSON.stringify(arr));
 }
 function buildStatsSummaryText(){
   if(!_data)return null;
