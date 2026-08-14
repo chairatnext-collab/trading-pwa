@@ -589,6 +589,23 @@ function computeYTD(allMonthPnL,cumulEq){
   return{ytdPnL,totalTrades,totalWins,currentEquity,returnPct,ytdWR};
 }
 
+function parseWithdrawalDates(content){
+  const _s=content.indexOf('บัญชีเงินทุน');const _e=_s<0?0:content.indexOf('สรุปเงินต้น-ถอน',_s);
+  const _chunk=_s<0?'':content.slice(_s,_e<0?content.length:_e);
+  const re=/\|\s*\d+\s*\|\s*(\d{4})-(\d{2})-(\d{2})\s*\|\s*ถอนเงิน[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\$?([\d,]+\.?\d*)\s*\|/g;
+  const byAbbr={};let m;
+  while((m=re.exec(_chunk))!==null){
+    const abbr=NUM_TO_ABBR[parseInt(m[2])];
+    if(!abbr)continue;
+    const day=parseInt(m[3]);
+    const amount=parseFloat(m[4].replace(/,/g,''));
+    if(isNaN(amount))continue;
+    if(!byAbbr[abbr])byAbbr[abbr]=[];
+    byAbbr[abbr].push({day,amount});
+  }
+  return byAbbr;
+}
+
 function processData(content){
   const allMonthPnL=parseAllMonthlyPnL(content);
   const monthly=parseMonthlyData(content);
@@ -597,9 +614,10 @@ function processData(content){
   for(const a of ABBRS){if(content.indexOf('\\[merged\\] '+a+' 20')!==-1){curAbbr=a;break;}}
   if(!curAbbr)for(const a of[...MONTH_ORDER].reverse()){if(allMonthPnL[a]?.hasTrades){curAbbr=a;break;}}
   const curKey=curAbbr?ABBR_TO_KEY[curAbbr]:null;
+  const withdrawals=parseWithdrawalDates(content);
   const cumulEq={};let running=INIT_CAP;
   for(const a of MONTH_ORDER){const delta=allMonthPnL[a]?.deltaVal??monthly[a]?.pnl??0;const wd=monthly[a]?.withdrawal??0;cumulEq[a]={startEq:running,endEq:running+delta-wd,withdrawal:wd};running+=delta-wd;}
-  return{allMonthPnL,monthly,cumulEq,curAbbr,curKey};
+  return{allMonthPnL,monthly,cumulEq,curAbbr,curKey,withdrawals};
 }
 
 // ─── LOAD ─────────────────────────────────────────────────────────────────────
@@ -809,7 +827,9 @@ function renderHistory(curAbbr){
     if(pnl===0&&trades===0&&!isActive)continue;
     const pc=pnl>0?'pnl-pos':pnl<0?'pnl-neg':'pnl-zero';
     const ps=pnl>0?'+$'+pnl.toFixed(2):pnl<0?'-$'+Math.abs(pnl).toFixed(2):'$0.00';
-    const wdTag=wd>0?`<div style="font-size:10px;color:var(--muted)">ถอน -$${wd.toFixed(2)}</div>`:'';
+    const wdList=_data.withdrawals?.[a]||[];
+    const wdTag=wdList.length?wdList.map(w=>`<div style="font-size:10px;color:var(--muted)">ถอน -$${w.amount.toFixed(2)} (${w.day} ${a})</div>`).join(''):(wd>0?`<div style="font-size:10px;color:var(--muted)">ถอน -$${wd.toFixed(2)}</div>`:'');
+
     html+=`<tr class="${isActive?'cur':''}">
       <td>${a}${isActive?'<span class="month-tag">▶</span>':''}${wdTag}</td>
       <td style="text-align:right" class="${pc}">${ps}</td>
