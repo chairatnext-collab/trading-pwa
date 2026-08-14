@@ -948,7 +948,44 @@ async function init(){
 function getLocalAnalysis(){
   try{return JSON.parse(localStorage.getItem('aiAnalysisLocal')||'[]');}catch(e){return [];}
 }
-function formatStatsSummary(text){if(!text)return '';const t=text.trim();const labels=['ภาพรวมผลงาน','จุดที่ควรสังเกต','คำแนะนำ'];let html='';for(let i=0;i<labels.length;i++){const lbl=labels[i];const startIdx=t.indexOf(lbl);if(startIdx===-1)continue;let bodyStart=startIdx+lbl.length;let bodyEnd=t.length;for(let j=i+1;j<labels.length;j++){const nIdx=t.indexOf(labels[j],bodyStart);if(nIdx!==-1){bodyEnd=nIdx;break;}}let body=t.slice(bodyStart,bodyEnd).trim();if(body[0]===':'||body[0]==='：')body=body.slice(1).trim();html+='<div class="ai-section-title">'+lbl+'</div><div class="ai-section-body">'+body+'</div>';}if(!html)html='<div class="ai-section-body">'+t+'</div>';return html;}function saveLocalAnalysis(result){
+function formatStatsSummary(text){
+  if(!text)return '';
+  const t=text.trim();
+  const labels=['ภาพรวมผลงาน','จุดที่ควรสังเกต','คำแนะนำ'];
+  const idxs=labels.map(l=>t.indexOf(l));
+  let html='';
+  if(idxs.every(x=>x!==-1)){
+    for(let i=0;i<labels.length;i++){
+      const lbl=labels[i];
+      const startIdx=idxs[i];
+      let bodyStart=startIdx+lbl.length;
+      let bodyEnd=t.length;
+      for(let j=i+1;j<labels.length;j++){
+        if(idxs[j]!==-1&&idxs[j]>bodyStart){bodyEnd=idxs[j];break;}
+      }
+      let body=t.slice(bodyStart,bodyEnd).trim();
+      if(body[0]===':'||body[0]==='：')body=body.slice(1).trim();
+      html+='<div class="ai-section-title">'+lbl+'</div><div class="ai-section-body">'+body+'</div>';
+    }
+  }
+  if(!html){
+    const lines=t.split('\n');
+    const headerRe=/^\s*(?:#{1,4}\s*|\*\*)([^\n*:]{2,40}?)(?:\*\*)?\s*:?\s*$/;
+    const sections=[];let cur=null;
+    for(const line of lines){
+      const m=line.match(headerRe);
+      if(m&&m[1].trim().length){cur={title:m[1].trim(),body:[]};sections.push(cur);}
+      else{if(!cur){cur={title:'',body:[]};sections.push(cur);}cur.body.push(line);}
+    }
+    if(sections.filter(s=>s.title).length>=2){
+      html=sections.map(s=>(s.title?'<div class="ai-section-title">'+s.title+'</div>':'')+(s.body.join('\n').trim()?'<div class="ai-section-body">'+s.body.join('\n').trim()+'</div>':'')).join('');
+    }
+  }
+  if(!html)html='<div class="ai-section-body">'+t+'</div>';
+  return html;
+}
+
+function saveLocalAnalysis(result){
   let arr=getLocalAnalysis();if(result.type==='stats')arr=arr.filter(x=>x.type!=='stats');arr.push(result);localStorage.setItem('aiAnalysisLocal',JSON.stringify(arr));
 }
 function buildStatsSummaryText(){
