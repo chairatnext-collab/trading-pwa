@@ -626,7 +626,7 @@ function showError(msg){
 
 function buildMonthDropdown(){
   const sel=document.getElementById('monthSel');
-  const OPTS=MONTH_ORDER.filter(a=>_data.allMonthPnL[a]?.hasTrades||_data.curAbbr===a);
+  const OPTS=MONTH_ORDER;
   sel.innerHTML=OPTS.map(a=>`<option value="${a}"${a===_selectedMonth?' selected':''}>${a}${a===_data.curAbbr?' ◀':''}</option>`).join('');
   if(!OPTS.includes(_selectedMonth)&&OPTS.length)_selectedMonth=OPTS[OPTS.length-1];
 }
