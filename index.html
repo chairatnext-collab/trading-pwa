@@ -415,6 +415,21 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
           </table>
         </div>
       </div>
+      <div class="hist-section" style="margin-top:14px">
+        <div class="section-title">ประวัติฝาก-ถอน</div>
+        <div class="hist-wrap">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">วันที่</th>
+                <th style="text-align:left">รายการ</th>
+                <th style="text-align:right">จำนวน</th>
+              </tr>
+            </thead>
+            <tbody id="cashFlowBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
       <div class="page" id="pageAI">
@@ -589,21 +604,23 @@ function computeYTD(allMonthPnL,cumulEq){
   return{ytdPnL,totalTrades,totalWins,currentEquity,returnPct,ytdWR};
 }
 
-function parseWithdrawalDates(content){
+function parseCashFlows(content){
   const _s=content.indexOf('บัญชีเงินทุน');const _e=_s<0?0:content.indexOf('สรุปเงินต้น-ถอน',_s);
   const _chunk=_s<0?'':content.slice(_s,_e<0?content.length:_e);
-  const re=/\|\s*\d+\s*\|\s*(\d{4})-(\d{2})-(\d{2})\s*\|\s*ถอนเงิน[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\$?([\d,]+\.?\d*)\s*\|/g;
-  const byAbbr={};let m;
+  const re=/\|\s*\d+\s*\|\s*(\d{4})-(\d{2})-(\d{2})\s*\|\s*(ฝากเงิน|ถอนเงิน)[^|]*\|[^|]*\|[^|]*\|[^|]*\|\s*\$?([\d,]+\.?\d*)\s*\|/g;
+  const list=[];let m;
   while((m=re.exec(_chunk))!==null){
-    const abbr=NUM_TO_ABBR[parseInt(m[2])];
+    const month=parseInt(m[2]);
+    const abbr=NUM_TO_ABBR[month];
     if(!abbr)continue;
     const day=parseInt(m[3]);
-    const amount=parseFloat(m[4].replace(/,/g,''));
+    const amount=parseFloat(m[5].replace(/,/g,''));
     if(isNaN(amount))continue;
-    if(!byAbbr[abbr])byAbbr[abbr]=[];
-    byAbbr[abbr].push({day,amount});
+    const type=m[4]==='ฝากเงิน'?'deposit':'withdraw';
+    list.push({date:m[1]+'-'+m[2]+'-'+m[3],day,abbr,type,amount});
   }
-  return byAbbr;
+  list.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  return list;
 }
 
 function processData(content){
@@ -614,10 +631,10 @@ function processData(content){
   for(const a of ABBRS){if(content.indexOf('\\[merged\\] '+a+' 20')!==-1){curAbbr=a;break;}}
   if(!curAbbr)for(const a of[...MONTH_ORDER].reverse()){if(allMonthPnL[a]?.hasTrades){curAbbr=a;break;}}
   const curKey=curAbbr?ABBR_TO_KEY[curAbbr]:null;
-  const withdrawals=parseWithdrawalDates(content);
+  const cashFlows=parseCashFlows(content);
   const cumulEq={};let running=INIT_CAP;
   for(const a of MONTH_ORDER){const delta=allMonthPnL[a]?.deltaVal??monthly[a]?.pnl??0;const wd=monthly[a]?.withdrawal??0;cumulEq[a]={startEq:running,endEq:running+delta-wd,withdrawal:wd};running+=delta-wd;}
-  return{allMonthPnL,monthly,cumulEq,curAbbr,curKey,withdrawals};
+  return{allMonthPnL,monthly,cumulEq,curAbbr,curKey,cashFlows};
 }
 
 // ─── LOAD ─────────────────────────────────────────────────────────────────────
@@ -737,6 +754,7 @@ function renderAll(){
 
   // ── History
   renderHistory(abbr);
+  renderCashFlows();
 
   // ── Charts if visible
   if(document.getElementById('pageChart').classList.contains('active'))renderCharts();
@@ -827,11 +845,8 @@ function renderHistory(curAbbr){
     if(pnl===0&&trades===0&&!isActive)continue;
     const pc=pnl>0?'pnl-pos':pnl<0?'pnl-neg':'pnl-zero';
     const ps=pnl>0?'+$'+pnl.toFixed(2):pnl<0?'-$'+Math.abs(pnl).toFixed(2):'$0.00';
-    const wdList=_data.withdrawals?.[a]||[];
-    const wdTag=wdList.length?wdList.map(w=>`<div style="font-size:10px;color:var(--muted)">ถอน -$${w.amount.toFixed(2)} (${w.day} ${a})</div>`).join(''):(wd>0?`<div style="font-size:10px;color:var(--muted)">ถอน -$${wd.toFixed(2)}</div>`:'');
-
     html+=`<tr class="${isActive?'cur':''}">
-      <td>${a}${isActive?'<span class="month-tag">▶</span>':''}${wdTag}</td>
+      <td>${a}${isActive?'<span class="month-tag">▶</span>':''}</td>
       <td style="text-align:right" class="${pc}">${ps}</td>
       <td style="text-align:right" class="eq-col">$${eq.toFixed(2)}</td>
       <td style="text-align:right;color:var(--muted)">${trades||'—'}</td>
@@ -839,6 +854,25 @@ function renderHistory(curAbbr){
     </tr>`;
   }
   document.getElementById('histBody').innerHTML=html||'<tr><td colspan="5" class="no-data">ยังไม่มีข้อมูล</td></tr>';
+}
+
+
+function renderCashFlows(){
+  const body=document.getElementById('cashFlowBody');
+  if(!body)return;
+  const list=_data.cashFlows||[];
+  if(!list.length){body.innerHTML='<tr><td colspan="3" class="no-data">ยังไม่มีข้อมูล</td></tr>';return;}
+  body.innerHTML=list.map(cf=>{
+    const isDep=cf.type==='deposit';
+    const label=isDep?'ฝากเงิน':'ถอนเงิน';
+    const cls=isDep?'pnl-pos':'pnl-neg';
+    const sign=isDep?'+':'-';
+    return `<tr>
+      <td style="text-align:left;color:var(--muted)">${cf.day} ${cf.abbr}</td>
+      <td style="text-align:left" class="${cls}">${label}</td>
+      <td style="text-align:right" class="${cls}">${sign}$${cf.amount.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderCharts(){
