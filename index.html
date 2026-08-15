@@ -998,6 +998,14 @@ function buildStatsSummaryText(){
   lines.push('เดือนปัจจุบัน: '+abbr);
   lines.push('Equity เริ่มต้นเดือน: $'+cum.startEq.toFixed(2)+', Equity ปัจจุบัน: $'+cum.endEq.toFixed(2));
   lines.push('กำไร/ขาดทุนเดือนนี้: $'+(mData.deltaVal||0).toFixed(2));
+  const wdThisMonth=(_data.cashFlows||[]).filter(cf=>cf.abbr===abbr&&cf.type==='withdraw');
+  const depThisMonth=(_data.cashFlows||[]).filter(cf=>cf.abbr===abbr&&cf.type==='deposit');
+  if(wdThisMonth.length){
+    lines.push('ถอนเงินออกจากพอร์ตเดือนนี้: '+wdThisMonth.map(w=>'$'+w.amount.toFixed(2)+' (วันที่ '+w.day+' '+abbr+')').join(', ')+' — นี่คือสาเหตุที่ Equity เพิ่มขึ้นน้อยกว่ากำไรที่ทำได้จริง ไม่ใช่ข้อผิดพลาดของข้อมูล');
+  }
+  if(depThisMonth.length){
+    lines.push('ฝากเงินเข้าพอร์ตเดือนนี้: '+depThisMonth.map(w=>'$'+w.amount.toFixed(2)+' (วันที่ '+w.day+' '+abbr+')').join(', '));
+  }
   lines.push('Win rate (วัน) เดือนนี้: '+(mData.winRateDay||'-'));
   lines.push('Profit factor เดือนนี้: '+(mData.dayPF||'-'));
   lines.push('จำนวนวันเทรดเดือนนี้: '+(mData.total||0)+' (ชนะ '+(mData.wins||0)+' วัน, แพ้ '+(mData.losses||0)+' วัน)');
