@@ -525,13 +525,12 @@ async function fetchSheetRows(apiKey){
 
 // ─── PARSERS ──────────────────────────────────────────────────────────────────
 function parseAllMonthlyPnL(content){
-  // Sheet format: 2026-MM-DD | $X.XX (lookahead on closing | so multi-column rows all match)
-  const re=/\| (2026)-(\d{2})-(\d{2}) \| (-?\$?[\d,.]+) (?=\|)/g;
+  const _s=content.indexOf('Daily P/L');const _e=_s<0?0:content.indexOf('Monthly Summary 2026',_s);const _chunk=_s<0?'':content.slice(_s,_e<0?content.length:_e);const re=/\|\s*(\d{4})-(\d{2})-(\d{2})\s*\|\s*(\?-?$?[\d,.]+)\s*(?=\|)/g;
   const byAbbr={};let m;
-  while((m=re.exec(content))!==null){
-    const month=parseInt(m[2]),day=parseInt(m[3]),abbr=NUM_TO_ABBR[month];
+  while((m=re.exec(_chunk))!==null){
+    const day=parseInt(m[3]),month=parseInt(m[2]),abbr=NUM_TO_ABBR[month];
     if(!abbr)continue;
-    const pnl=parseFloat(m[4].replace(/[$,]/g,''));
+    const pnl=parseFloat(m[4].replace(/[\$,]/g,''));
     if(isNaN(pnl)||pnl===0)continue;
     if(!byAbbr[abbr])byAbbr[abbr]={pnl:{}};
     byAbbr[abbr].pnl[day]=(byAbbr[abbr].pnl[day]||0)+pnl;
