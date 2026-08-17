@@ -531,14 +531,16 @@ async function fetchSheetRows(apiKey){
   const sheets=(meta.sheets||[]).map(s=>s.properties.title);
   if(!sheets.length)throw new Error('ไม่พบ Sheet');
   const ranges=sheets.map(s=>encodeURIComponent(s));
-  ranges.push(encodeURIComponent('บันทึกการเทรด!A4:Y2000'));
+  const tradeLogTabs=sheets.filter(s=>s.indexOf('บันทึกการเทรด')===0);
+  const extraStart=ranges.length;
+  tradeLogTabs.forEach(t=>ranges.push(encodeURIComponent(t+'!A4:Y2000')));
   const batchUrl=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchGet?key=${apiKey}&valueRenderOption=FORMATTED_VALUE&${ranges.map(r=>'ranges='+r).join('&')}`;
   const batch=await fetch(batchUrl).then(r=>r.json());
   if(batch.error)throw new Error(batch.error.message);
   let text='';
   const vrs=batch.valueRanges||[];
   vrs.forEach((vr,i)=>{
-    const isTradeDetail=(i===vrs.length-1);
+    const isTradeDetail=(i>=extraStart);
     if(isTradeDetail)text+='###TRADEDETAIL_START###\n';
     for(const row of(vr.values||[]))text+='| '+row.join(' | ')+' |\n';
     if(isTradeDetail)text+='###TRADEDETAIL_END###\n';
@@ -647,35 +649,44 @@ function parseCashFlows(content){
 }
 
 function parseTradeDetails(content){
-  const s=content.indexOf('###TRADEDETAIL_START###');
-  const e=content.indexOf('###TRADEDETAIL_END###');
-  if(s<0||e<0)return [];
-  const chunk=content.slice(s,e);
-  const lines=chunk.split('\n').filter(l=>l.trim().startsWith('|'));
   const trades=[];
-  for(const line of lines){
-    let cols=line.split('|').map(c=>c.trim());
-    if(cols.length&&cols[0]==='')cols=cols.slice(1);
-    if(cols.length&&cols[cols.length-1]==='')cols=cols.slice(0,-1);
-    if(!cols[0]||!/^\d+$/.test(cols[0]))continue;
-    const dateOpen=cols[2]||'';
-    const dm=dateOpen.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if(!dm)continue;
-    const abbr=NUM_TO_ABBR[parseInt(dm[2])];
-    if(!abbr)continue;
-    const pnl=parseFloat((cols[14]||'').replace(/[$,]/g,''));
-    if(isNaN(pnl))continue;
-    const entry=parseFloat((cols[9]||'').replace(/,/g,''));
-    const exitP=parseFloat((cols[10]||'').replace(/,/g,''));
-    const sl=parseFloat((cols[11]||'').replace(/,/g,''));
-    const tp=parseFloat((cols[12]||'').replace(/,/g,''));
-    let rrPlan=null,rrReal=null;
-    if(!isNaN(entry)&&!isNaN(sl)&&entry!==sl){
-      const risk=Math.abs(entry-sl);
-      if(!isNaN(tp)&&risk>0)rrPlan=Math.abs(tp-entry)/risk;
-      if(!isNaN(exitP)&&risk>0)rrReal=(pnl>=0?1:-1)*Math.abs(exitP-entry)/risk;
+  const seenTickets=new Set();
+  let searchFrom=0;
+  while(true){
+    const s=content.indexOf('###TRADEDETAIL_START###',searchFrom);
+    if(s<0)break;
+    const e=content.indexOf('###TRADEDETAIL_END###',s);
+    if(e<0)break;
+    const chunk=content.slice(s,e);
+    searchFrom=e+1;
+    const lines=chunk.split('\n').filter(l=>l.trim().startsWith('|'));
+    for(const line of lines){
+      let cols=line.split('|').map(c=>c.trim());
+      if(cols.length&&cols[0]==='')cols=cols.slice(1);
+      if(cols.length&&cols[cols.length-1]==='')cols=cols.slice(0,-1);
+      if(!cols[0]||!/^\d+$/.test(cols[0]))continue;
+      const ticket=cols[1]||'';
+      if(ticket&&seenTickets.has(ticket))continue;
+      const dateOpen=cols[2]||'';
+      const dm=dateOpen.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if(!dm)continue;
+      const abbr=NUM_TO_ABBR[parseInt(dm[2])];
+      if(!abbr)continue;
+      const pnl=parseFloat((cols[14]||'').replace(/[$,]/g,''));
+      if(isNaN(pnl))continue;
+      if(ticket)seenTickets.add(ticket);
+      const entry=parseFloat((cols[9]||'').replace(/,/g,''));
+      const exitP=parseFloat((cols[10]||'').replace(/,/g,''));
+      const sl=parseFloat((cols[11]||'').replace(/,/g,''));
+      const tp=parseFloat((cols[12]||'').replace(/,/g,''));
+      let rrPlan=null,rrReal=null;
+      if(!isNaN(entry)&&!isNaN(sl)&&entry!==sl){
+        const risk=Math.abs(entry-sl);
+        if(!isNaN(tp)&&risk>0)rrPlan=Math.abs(tp-entry)/risk;
+        if(!isNaN(exitP)&&risk>0)rrReal=(pnl>=0?1:-1)*Math.abs(exitP-entry)/risk;
+      }
+      trades.push({day:parseInt(dm[3]),abbr,dateOpen,asset:cols[6]||'',dir:cols[7]||'',lot:cols[8]||'',entry,exitP,sl,tp,pnl,rrPlan,rrReal});
     }
-    trades.push({day:parseInt(dm[3]),abbr,dateOpen,asset:cols[6]||'',dir:cols[7]||'',lot:cols[8]||'',entry,exitP,sl,tp,pnl,rrPlan,rrReal});
   }
   return trades;
 }
